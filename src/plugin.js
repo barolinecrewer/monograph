@@ -65,7 +65,7 @@ function greeting(current) {
 
 const toolsShown = current => current.tools !== 'hidden'
 // Live reasoning: "live" draws it as a few dim lines while the model works,
-// "line" draws only the working line (the reasoning stays under "Worked for").
+// "line" draws none of it while the turn runs (it stays under "Worked for").
 const thinkingMode = current => (current.thinking === 'line' ? 'line' : 'live')
 
 function applyConfig(current) {
@@ -710,8 +710,6 @@ const elapsedLabel = seconds => {
 
 const ROW = '[data-slot="aui_assistant-message-root"]'
 const RUNNING = '#mf-live, [data-slot="aui_turn-activity"], [data-slot="aui_response-loading"]'
-// Hermes' mark on a reply the reader stopped.
-const STOPPED = '[data-slot="aui_assistant-message-stopped"]'
 const CONTENT = '[data-slot="aui_assistant-message-content"]'
 const ROW_MARKS = ['mgSeg', 'mgPart', 'mgHead', 'mgWorked', 'mgSteps', 'mgOpen', 'mgAnim', 'role', 'tabindex', 'aria-expanded', 'aria-label']
 const BUSY = '[data-slot="aui_turn-activity"], [data-slot="aui_response-loading"]'
@@ -2396,7 +2394,8 @@ function turnDecor() {
       if (!segment.rows.length) {
         // A queued prompt handed over, its first words not yet streamed:
         // the working line goes right after its bubble (the first row will
-        // take that same line over, so the bar runs on without a restart).
+        // take that same line over, so nothing is put in or taken out when
+        // the first words arrive).
         if (segment.prompt) {
           out.lines.push([segment.prompt, last && running ? { working: true } : null])
         }
@@ -2426,15 +2425,9 @@ function turnDecor() {
         // which restyle the whole reply (5,300 elements for a 2,000-line
         // one) twice at every turn end. Kept, it only changes its marks, and
         // a line for rows Hermes swaps in goes in with them, in their frame.
-        // The bar stays quiet when something else already says the turn is
-        // working (the owner's live-status line, #mf-live, in this pair), or
-        // when its row held finished text before (a turn continuing under an
-        // earlier reply): there it would be a stray dash far above the work.
-        // The same goes for a reply the reader stopped: what runs under it
-        // (Hermes summarizing the thread) has its own status row.
-        const quiet = running && (Boolean(pair.querySelector('#mf-live')) || finishedRows.has(segment.rows[0]) || Boolean(segment.rows.at(-1).querySelector(STOPPED)))
-
-        segment.rows.forEach((row, at) => out.lines.push([row, at === 0 ? (running ? { working: true, quiet } : {}) : null]))
+        // The line draws nothing while it works: the status row under the
+        // reply (Hermes' own, or a live-status line) says the turn is running.
+        segment.rows.forEach((row, at) => out.lines.push([row, at === 0 ? (running ? { working: true } : {}) : null]))
 
         return
       }
@@ -2476,8 +2469,8 @@ function turnDecor() {
   const SHAPE = new Set(['mgSeg', 'mgPart', 'mgHead', 'mgOpen', 'mgCompaction', 'mgStale', 'mgThink', 'mgWork'])
 
   // ── The line, as an element ──
-  // "Worked for 7m 56s · 12 tool calls" (and, while the turn runs, the
-  // working bar) is one small element of ours, <div class="mg-line">, put
+  // "Worked for 7m 56s · 12 tool calls" (while the turn runs: its room,
+  // held empty) is one small element of ours, <div class="mg-line">, put
   // in the response group right before the row whose room it fills (as the
   // queued bubbles are). It used to be a ::before on the row: any generated
   // box on a reply row (even content "" or a single letter, in or out of
@@ -2487,7 +2480,7 @@ function turnDecor() {
   const lineOf = new WeakMap() // row → its line
   const lines = new Set()
 
-  const LINE_HTML = '<span class="mg-line-bar"></span><span class="mg-line-worked"></span><span class="mg-line-steps"></span><span class="mg-line-arrow">\ueab6</span>'
+  const LINE_HTML = '<span class="mg-line-worked"></span><span class="mg-line-steps"></span><span class="mg-line-arrow">\ueab6</span>'
 
   const setText = (node, text) => {
     if (node.textContent !== text) {
@@ -2518,7 +2511,7 @@ function turnDecor() {
     }
 
     // The first row after a bubble takes the bubble's working line over
-    // where it stands: the same element, so the bar's pulse does not restart.
+    // where it stands: the same element, so the group gains and loses nothing.
     const before = line ? null : row.previousElementSibling
 
     const bubble = before && lines.has(before) && !isBubble(row) && !isGroup(row) ? ownerOf.get(before) : null
@@ -2549,7 +2542,6 @@ function turnDecor() {
     }
 
     put(line, 'mgWorking', spec.working ? '' : null)
-    put(line, 'mgQuiet', spec.working && spec.quiet ? '' : null)
 
     if (isBubble(row) || isGroup(row)) {
       return
@@ -2557,11 +2549,11 @@ function turnDecor() {
 
     // The words fade in when they first appear on a line that just ended
     // (the line itself is already there: it was the working line).
-    const silent = !line.children[1].textContent && !line.children[2].textContent
+    const silent = !line.children[0].textContent && !line.children[1].textContent
 
     words(row, line)
 
-    if (silent && 'mgAnim' in row.dataset && !('mgAnim' in line.dataset) && (line.children[1].textContent || line.children[2].textContent)) {
+    if (silent && 'mgAnim' in row.dataset && !('mgAnim' in line.dataset) && (line.children[0].textContent || line.children[1].textContent)) {
       line.dataset.mgAnim = ''
       window.setTimeout(() => put(line, 'mgAnim', null), 520)
     }
@@ -2575,8 +2567,8 @@ function turnDecor() {
     const named = working ? '' : row.dataset.mgSteps ?? ''
     const steps = named && worked ? `  ·  ${named}` : named
 
-    setText(line.children[1], worked)
-    setText(line.children[2], steps)
+    setText(line.children[0], worked)
+    setText(line.children[1], steps)
     put(line, 'mgSteps', steps ? '' : null)
     put(line, 'mgOpen', steps && 'mgOpen' in row.dataset ? '' : null)
   }

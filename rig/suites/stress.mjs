@@ -75,7 +75,7 @@ export const checks = [
   ['s10b', 'Reference: s10 and s10r with Monograph unloaded (bare Hermes)'],
   ['s10', 'Thinking, 400 pieces over 20 s, pinned: shown while it streams, folds at the answer, opens and folds by press and Enter'],
   ['s10r', 'Thinking, 400 pieces, read from 600 px above: nothing being read moves'],
-  ['s10n', 'No reasoning: no thinking block; one working bar per thread while it runs, gone at the end, absent with motion off'],
+  ['s10n', 'No reasoning: no thinking block; one working line per thread while it runs, drawing nothing of its own beside the status row, gone at the end'],
   ['s11b', 'Reference: s11 and s11r with Monograph unloaded (bare Hermes)'],
   ['s11', 'Streaming feel, pinned: prose, code and tables, tool end, stop, error, next prompt at the end, session switch, resize, tools hidden'],
   ['s11r', 'Streaming feel, read from 600 px above: the same, nothing being read moves']
@@ -1536,21 +1536,23 @@ export async function run() {
     }
   })
 
-  // ── s10n. No reasoning; the working indicator ─────────────────────────────
+  // ── s10n. No reasoning; the working line ──────────────────────────────────
   // A reply with no reasoning shows no thinking block, empty or not. While a
-  // turn runs one row of the thread carries data-mg-working and draws one
-  // pulsing bar (opacity only); at the end it is gone; with motion off it is
-  // not drawn.
+  // turn runs one line of the thread carries data-mg-working: it holds the
+  // room of "Worked for" and draws nothing (no bar, no animation); the status
+  // row under the reply is what says the turn is running. At the end the mark
+  // is gone. The same with motion off.
   await check('s10n', async (entry, must) => {
     const indicator = () =>
       page.evaluate(`(() => {
         const v = ${ON_SCREEN_VIEWPORT}
         const rows = v ? [...v.querySelectorAll('.mg-line[data-mg-working]')] : []
-        const bar = rows[0]?.querySelector('.mg-line-bar')
-        const style = bar ? getComputedStyle(bar) : null
-        const anims = bar ? bar.getAnimations().map(a => a.animationName + ':' + a.playState + ':' + Object.keys(a.effect?.getKeyframes?.()[0] ?? {}).filter(k => !['offset', 'easing', 'composite', 'computedOffset'].includes(k)).join('+')) : []
+        const parts = rows[0] ? [rows[0], ...rows[0].children] : []
+        const drawn = parts.slice(1).filter(node => node.checkVisibility() && node.getBoundingClientRect().width > 0).map(node => node.className)
+        const anims = parts.flatMap(node => node.getAnimations().map(a => a.animationName ?? a.transitionProperty ?? 'animation'))
+        const status = v ? [...v.querySelectorAll('[data-slot="aui_turn-activity"], [data-slot="aui_response-loading"], #mf-live')].filter(node => node.checkVisibility() && node.getBoundingClientRect().width > 0).length : 0
 
-        return { rows: rows.length, shown: Boolean(bar && bar.checkVisibility() && bar.getBoundingClientRect().height > 0), height: style?.height ?? null, animation: style?.animationName ?? null, anims, thinking: v ? v.querySelectorAll('[data-slot="aui_thinking-disclosure"]').length : 0 }
+        return { rows: rows.length, drawn, anims, status, hairline: rows[0] ? getComputedStyle(rows[0]).borderBottomColor : null, thinking: v ? v.querySelectorAll('[data-slot="aui_thinking-disclosure"]').length : 0 }
       })()`)
 
     await newSession()
@@ -1580,10 +1582,10 @@ export async function run() {
 
     Object.assign(entry.evidence, { running, ended, motionOff: off })
     must(running.thinking === 0 && ended.thinking === 0, `a thinking block was drawn for a reply with no reasoning: ${running.thinking}, ${ended.thinking}`)
-    must(running.rows === 1 && running.shown && running.animation === 'monograph-pulse', `while running, one line should draw the working bar: ${JSON.stringify(running)}`)
-    must(running.anims.every(name => !/transform/.test(name)), `the indicator animates more than opacity: ${running.anims}`)
-    must(ended.rows === 0, `the working bar is still there after the turn: ${JSON.stringify(ended)}`)
-    must(!off.shown && off.anims.length === 0, `with motion off the working bar is drawn: ${JSON.stringify(off)}`)
+    must(running.rows === 1 && running.drawn.length === 0 && running.anims.length === 0, `while running, one line should hold the room and draw nothing: ${JSON.stringify(running)}`)
+    must(running.status > 0, `while running, no status row was on screen: ${JSON.stringify(running)}`)
+    must(ended.rows === 0, `a line is still marked working after the turn: ${JSON.stringify(ended)}`)
+    must(off.drawn.length === 0 && off.anims.length === 0, `with motion off the working line draws something: ${JSON.stringify(off)}`)
   })
 
   // ── s11. Streaming feel ───────────────────────────────────────────────────

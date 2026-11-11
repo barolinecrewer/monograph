@@ -40,7 +40,7 @@ export const checks = [
   ['s13', 'Opened work: run headers readable (4.5:1 on the canvas), every row on the same rhythm'],
   ['s14', 'Reasoning drawn while it streams in a later turn of the same session and after a session switch'],
   ['s15', 'A sign of life: from 300 ms after a prompt until its first words or tool row, something on screen says the model is working'],
-  ['s16', 'Thinking setting: "live" shows reasoning and its fold moves neither the answer nor the bottom; "line" shows no reasoning while it runs, only the working line, and it unfolds afterwards']
+  ['s16', 'Thinking setting: "live" shows reasoning and its fold moves neither the answer nor the bottom; "line" shows no reasoning while it runs, only the status row, and it unfolds afterwards']
 ]
 
 export const config = 'display:\n  show_reasoning: true\n'
@@ -680,11 +680,11 @@ const install = () => state.page.evaluate(recorder, { running: RUNNING, viewport
 // MG_RIG_PLANT=s7fold,s7hidden,s15,s16 (any of them, comma separated).
 //   s7fold    every 1.5 s while the thread builds, a folded row loses its fold
 //   s7hidden  an arrival of ours plays on a hidden element in the thread
-//   s15       our working line is never drawn
+//   s15       every sign of life is hidden
 //   s16       the reasoning's fold moves the answer up by 40 px
 const PLANTS = new Set((process.env.MG_RIG_PLANT ?? '').split(',').filter(Boolean))
 const PLANT_CSS = {
-  s15: '.mg-line[data-mg-working] { display: none !important; }',
+  s15: '[data-slot="aui_thinking-disclosure"], [data-slot="aui_turn-activity"], [data-slot="aui_response-loading"], #mf-live { display: none !important; }',
   s16: '[data-slot="aui_assistant-message-content"]:has(> [data-mg-think="folded"]) > .aui-md { translate: 0 -40px; }'
 }
 const plant = async id => {
@@ -1433,12 +1433,6 @@ export async function run() {
     }
 
     entry.evidence.replaysInEarlierPhases = replays.slice(0, 10)
-    // What happened to the working line around each restart of its pulse.
-    entry.evidence.lineAroundPulseReplays = phases.flatMap(rec =>
-      rec.replays
-        .filter(replay => replay.name === 'monograph-pulse')
-        .map(replay => ({ phase: rec.tag, at: replay.seen.map(seen => seen.t), log: (rec.lineLog ?? []).filter(note => replay.seen.slice(1).some(seen => Math.abs(note.t - seen.t) <= 400)).slice(0, 30) }))
-    )
     entry.evidence.oursOutsideRunningTurn = historyAnims.length
     entry.evidence.namesOutsideRunningTurn = [...new Set(historyAnims.map(start => start.name))]
     must(replays.length === 0, `${replays.length} element animations started more than once: ${replays.slice(0, 4).map(replay => `${replay.name} on ${replay.node} x${replay.count}`).join('; ')}`)
@@ -2040,15 +2034,16 @@ export async function run() {
 
   // ── s15. A sign of life before the first words ───────────────────────────
   // From 300 ms after a prompt is sent until the first text or tool row of
-  // its reply, something visible must say the model is working: the working
-  // bar, a Thinking line, or Hermes' own activity row. Sampled every frame.
+  // its reply, something visible must say the model is working: a Thinking
+  // line, Hermes' own status row, or a live-status line. Sampled every frame.
+  // (Monograph draws no indicator of its own: its pulsing bar was removed.)
   const signOfLife = (id, sinceSend) =>
     page.evaluate(
       ({ id, viewport, sinceSend }) =>
         new Promise(resolve => {
           const t0 = performance.now() - sinceSend
           const frames = []
-          const SIGNS = '.mg-line[data-mg-working] > .mg-line-bar, [data-slot="aui_thinking-disclosure"], [data-slot="aui_turn-activity"], [data-slot="aui_response-loading"], #mf-live'
+          const SIGNS = '[data-slot="aui_thinking-disclosure"], [data-slot="aui_turn-activity"], [data-slot="aui_response-loading"], #mf-live'
           const visible = (node, box) => {
             if (!node.checkVisibility({ opacityProperty: true, visibilityProperty: true })) {
               return false
@@ -2089,7 +2084,7 @@ export async function run() {
               const box = v.getBoundingClientRect()
               const signs = [...v.querySelectorAll(SIGNS)].filter(node => visible(node, box))
 
-              frames.push({ t, ours: signs.some(node => node.matches('.mg-line-bar')), sign: signs.length ? (signs[0].className?.toString().slice(0, 20) || signs[0].dataset.slot || signs[0].id) : null })
+              frames.push({ t, sign: signs.length ? (signs[0].className?.toString().slice(0, 20) || signs[0].dataset.slot || signs[0].id) : null })
             }
 
             requestAnimationFrame(tick)
@@ -2106,14 +2101,9 @@ export async function run() {
     must(!seen.timedOut, `${label}: no words or tool row within 30 s`)
     must(seen.frames.length >= 10, `${label}: only ${seen.frames.length} frames between 300 ms and the first words (the check would prove nothing)`)
     must(dark.length === 0, `${label}: nothing on screen said the model was working in ${dark.length} of ${seen.frames.length} frames (first at ${dark[0]?.t} ms; first words at ${seen.firstContentMs} ms)`)
-    // Hermes' own activity row comes and goes (it is absent for seconds in a
-    // queued prompt's hand-over): our working line alone must cover it all.
-    const bare = seen.frames.filter(frame => !frame.ours)
-
-    must(bare.length === 0, `${label}: our working line was not on screen in ${bare.length} of ${seen.frames.length} frames (first at ${bare[0]?.t} ms; first words at ${seen.firstContentMs} ms)`)
   }
 
-  const lifeSummary = seen => ({ frames: seen.frames.length, dark: seen.frames.filter(frame => !frame.sign).length, withoutOurLine: seen.frames.filter(frame => !frame.ours).length, firstWithoutOurLineMs: seen.frames.find(frame => !frame.ours)?.t ?? null, firstDarkMs: seen.frames.find(frame => !frame.sign)?.t ?? null, firstContentMs: seen.firstContentMs, signs: [...new Set(seen.frames.map(frame => frame.sign))] })
+  const lifeSummary = seen => ({ frames: seen.frames.length, dark: seen.frames.filter(frame => !frame.sign).length, firstDarkMs: seen.frames.find(frame => !frame.sign)?.t ?? null, firstContentMs: seen.firstContentMs, signs: [...new Set(seen.frames.map(frame => frame.sign))] })
 
   await check('s15', async (entry, must) => {
     await plant('s15')
@@ -2228,7 +2218,7 @@ export async function run() {
             const answer = pair ? [...pair.querySelectorAll('[data-slot="aui_assistant-message-content"] > .aui-md')].at(-1) : null
             const firstLine = answer?.querySelector('p, li, h1, h2, h3') ?? answer
             const bodies = pair ? [...pair.querySelectorAll('[data-slot="aui_thinking-body"]')].filter(node => node.checkVisibility() && node.getBoundingClientRect().height > 0) : []
-            const bar = v?.querySelector('.mg-line[data-mg-working] > .mg-line-bar')
+            const sign = pair ? [...pair.querySelectorAll('[data-slot="aui_turn-activity"], [data-slot="aui_response-loading"], #mf-live')] : []
 
             frames.push({
               t,
@@ -2237,7 +2227,7 @@ export async function run() {
               reasoningChars: bodies.reduce((sum, node) => sum + (node.textContent ?? '').length, 0),
               answerTop: firstLine ? Math.round(firstLine.getBoundingClientRect().top * 10) / 10 : null,
               gap: v ? Math.round((v.scrollHeight - v.scrollTop - v.clientHeight) * 10) / 10 : null,
-              bar: Boolean(bar?.checkVisibility() && bar.getBoundingClientRect().width > 0),
+              sign: sign.some(node => node.checkVisibility() && node.getBoundingClientRect().width > 0),
               live: pair ? 'mgLive' in pair.dataset : false,
               done: (pair?.textContent ?? '').includes(`Done ${id}.`)
             })
@@ -2286,7 +2276,7 @@ export async function run() {
     must(moved.length === 0, `live: when the reasoning folded, the answer's first line or the bottom moved: ${JSON.stringify(moved.slice(0, 4))}`)
     await sleep(800)
 
-    // Line: no reasoning while the turn runs, only the working line.
+    // Line: no reasoning while the turn runs, only the status row.
     const set = await setThinking('line')
 
     must(set === 'line', `the setting did not apply without a reload (data-mg-thinking=${set})`)
@@ -2303,11 +2293,11 @@ export async function run() {
       running: running.length,
       reasoningShownWhileRunning: shownWhileRunning.length,
       beforeWords: beforeWords.length,
-      withoutBarBeforeWords: beforeWords.filter(frame => !frame.bar).length
+      withoutSignBeforeWords: beforeWords.filter(frame => !frame.sign).length
     }
     must(running.length >= 10, `line: only ${running.length} running frames (the check would prove nothing)`)
     must(shownWhileRunning.length === 0, `line: reasoning was drawn in ${shownWhileRunning.length} running frames (first at ${shownWhileRunning[0]?.t} ms)`)
-    must(beforeWords.length > 0 && entry.evidence.line.withoutBarBeforeWords === 0, `line: the working line was missing in ${entry.evidence.line.withoutBarBeforeWords} of ${beforeWords.length} frames before the first words`)
+    must(beforeWords.length > 0 && entry.evidence.line.withoutSignBeforeWords === 0, `line: no status row was on screen in ${entry.evidence.line.withoutSignBeforeWords} of ${beforeWords.length} frames before the first words`)
     await sleep(800)
 
     // Afterwards the "Worked for" line unfolds it.

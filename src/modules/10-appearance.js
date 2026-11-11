@@ -403,11 +403,11 @@ function AppearancePage() {
               onChange: id => setConfig({ thinking: id === 'line' ? 'line' : 'live' }),
               options: [
                 { id: 'live', label: 'Live' },
-                { id: 'line', label: 'Working line' }
+                { id: 'line', label: 'Hidden' }
               ],
               value: thinkingMode(current)
             }),
-            description: 'Live shows the reasoning as a few dim lines while the model works, folded away once the answer starts. Working line shows only the line; the reasoning stays under "Worked for".',
+            description: 'Live shows the reasoning as a few dim lines while the model works, folded away once the answer starts. Hidden shows none of it until the turn ends; the reasoning stays under "Worked for".',
             id: 'monograph-thinking',
             title: 'Thinking'
           }),

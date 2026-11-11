@@ -24,7 +24,7 @@ export const checks = [
   ['p13', "Appearance: Hermes' Switch drawn in grayscale on the page, its state clear without colour, a gray focus ring"],
   ['p14', 'Appearance: tool calls shown or hidden applies to an open thread at once, and what was in view stays in view'],
   ['p15', 'Appearance: every value survives an app restart, and a second window shows the same'],
-  ['p16', 'Appearance: thinking, live or the working line only, stored and applied at once, Hermes\' own preference never written']
+  ['p16', 'Appearance: thinking, live or hidden while the turn runs, stored and applied at once, Hermes\' own preference never written']
 ]
 
 const TOOL_PROMPT = 'Rig appearance prompt, MG_RIG_AP. E2E_CALL(terminal)[{"command":"echo appearance"}]'
@@ -745,7 +745,7 @@ export async function run() {
 
     entry.evidence.tabOrder = order
 
-    const expected = ['name', 'choose', 'remove', 'greeting', 'Show tool calls', 'choice:Live', 'choice:Working line', 'choice:Comfortable', 'choice:Compact', 'Animations', 'reset']
+    const expected = ['name', 'choose', 'remove', 'greeting', 'Show tool calls', 'choice:Live', 'choice:Hidden', 'choice:Comfortable', 'choice:Compact', 'Animations', 'reset']
 
     must(JSON.stringify(order.slice(0, expected.length)) === JSON.stringify(expected), `Tab order ${JSON.stringify(order)}, expected ${JSON.stringify(expected)}`)
 
@@ -1248,7 +1248,7 @@ export async function run() {
 
     const first = await read()
 
-    await press(page().locator(`${PAGE} #monograph-thinking button`, { hasText: 'Working line' }))
+    await press(page().locator(`${PAGE} #monograph-thinking button`, { hasText: 'Hidden' }))
     await sleep(150)
 
     const line = await read()
@@ -1270,7 +1270,7 @@ export async function run() {
     await shot(entry, 'p16-thinking-row')
     must(first.buttons?.length === 2, `the Thinking row has ${first.buttons?.length ?? 'no'} choices: ${JSON.stringify(first.buttons)}`)
     must(first.mark === 'live' && first.buttons?.[0] === 'Live*', `by default thinking is not "live": ${JSON.stringify(first)}`)
-    must(line.mark === 'line' && line.stored === 'line' && line.buttons?.[1] === 'Working line*', `"Working line" did not apply at once and store: ${JSON.stringify(line)}`)
+    must(line.mark === 'line' && line.stored === 'line' && line.buttons?.[1] === 'Hidden*', `"Hidden" did not apply at once and store: ${JSON.stringify(line)}`)
     must(live.mark === 'live' && live.stored === 'live' && live.buttons?.[0] === 'Live*', `"Live" did not apply at once and store: ${JSON.stringify(live)}`)
     must(entry.evidence.hermesPrefAfter === prefBefore, `Hermes' stored reasoning preference changed: ${prefBefore} -> ${entry.evidence.hermesPrefAfter}`)
     must(!entry.evidence.configChanged, "the sandbox's config.yaml changed while thinking was switched")

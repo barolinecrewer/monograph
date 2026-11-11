@@ -63,7 +63,7 @@
   font-variant-numeric: tabular-nums; white-space: pre; user-select: none; pointer-events: none;
   transition: color var(--mg-dur-1) var(--mg-ease-out);
 }
-.mg-line > :is(.mg-line-bar, .mg-line-arrow) { display: none; }
+.mg-line > .mg-line-arrow { display: none; }
 :root[data-mg-tools="hidden"] .mg-line > .mg-line-steps { display: none; }
 
 /* With work behind it, the line is a disclosure */
@@ -82,29 +82,14 @@
   outline: 1px solid var(--mg-text-2); outline-offset: -2px; border-radius: var(--mg-r-button);
 }
 
-/* While the turn runs, the line's room shows that it is working: one short
-   bar where the line will be, pulsing in opacity only, no hairline. The
-   plugin draws it on one line per thread, the running segment's, and turns
-   that line into "Worked for" when the turn ends. With motion off or
-   reduced, it is not drawn. */
+/* While the turn runs the line's room is held, empty and without its
+   hairline: the plugin marks one line per thread, the running segment's, and
+   turns it into "Worked for" when the turn ends. It draws nothing of its own
+   meanwhile: the status row under the reply says the turn is running
+   (30-chat.css). */
 .mg-line[data-mg-working] { border-bottom-color: transparent; }
-.mg-line[data-mg-working] > .mg-line-bar {
-  display: block; width: 24px; height: 2px; border-radius: 1px; background: var(--mg-text-3); opacity: 0.35;
-}
-@media (prefers-reduced-motion: no-preference) {
-  :root:not([data-mg-motion="off"]) .mg-line[data-mg-working] > .mg-line-bar {
-    animation: monograph-pulse 1.4s var(--mg-ease-in-out) infinite;
-  }
-}
-@media (prefers-reduced-motion: reduce) {
-  .mg-line[data-mg-working] > .mg-line-bar { display: none; }
-}
-:root[data-mg-motion="off"] .mg-line[data-mg-working] > .mg-line-bar { display: none; }
-/* Another indicator of the same turn is on screen, or the line sits above
-   finished text (the plugin says so, data-mg-quiet): no bar. */
-.mg-line[data-mg-working][data-mg-quiet] > .mg-line-bar { display: none; }
 /* Thinking set to "line" (Settings > Monograph): no reasoning while the turn
-   runs, only the working line. It is still there under "Worked for". */
+   runs. It is still there under "Worked for". */
 :root[data-mg-thinking="line"] [data-mg-live] [data-slot="aui_thinking-disclosure"] { display: none; }
 
 /* Closed: only the answer, which is the last piece of prose in the segment's
