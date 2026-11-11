@@ -1,0 +1,24 @@
+{
+ "//": "Model logos, matched against 'provider/model' (lowercase substring). First match wins, so vendors come before the routers that resell them. SVGs: @lobehub/icons-static-svg 1.102.0 (MIT). Marks drawn in currentColor are painted in the text colour at build time. Third field: the vendor's brand colour, published as --mg-model for the model in use (the effort slider is drawn in it).",
+ "logos": [
+  ["claude", ["claude", "anthropic"], "#D97757"],
+  ["openai", ["openai", "gpt", "codex", "/o1", "/o3", "/o4"], "#10A37F"],
+  ["gemini", ["gemini", "gemma", "google"], "#4E8CF7"],
+  ["grok", ["grok", "x-ai", "xai"], "#C9C9CE"],
+  ["deepseek", ["deepseek"], "#4D6BFE"],
+  ["qwen", ["qwen", "alibaba", "dashscope"], "#615CED"],
+  ["kimi", ["kimi", "moonshot"], "#1E88FF"],
+  ["minimax", ["minimax"], "#F23F5D"],
+  ["zai", ["glm", "z-ai", "zhipu"], "#3859FF"],
+  ["xiaomi", ["mimo", "xiaomi"], "#FF6900"],
+  ["hunyuan", ["hunyuan", "tencent", "/hy3", "/hy4"], "#0A6CFF"],
+  ["stepfun", ["stepfun", "step-3", "step-4"], "#2F6BFF"],
+  ["nvidia", ["nvidia", "nemotron"], "#76B900"],
+  ["meta", ["meta/", "meta-llama", "muse-spark", "llama"], "#0081FB"],
+  ["sakana", ["sakana", "fugu"], "#E0483A"],
+  ["upstage", ["upstage", "solar-"], "#8867FB"],
+  ["mistral", ["mistral", "codestral", "devstral", "mixtral"], "#FA520F"],
+  ["hermes", ["hermes", "nousresearch"], "#C9C9CE"],
+  ["openrouter", ["openrouter"], "#6566F1"]
+ ]
+}

@@ -1,0 +1,290 @@
+/* ─────────────────────────────────────────────────────────────
+   Turns: the divider, tool chips, the thinking trace, streamed text,
+   and what a message offers on hover.
+   The plugin (turnDecor in plugin.js) cuts a reply into segments, the rows
+   between one prompt and the next, and marks each finished one:
+     data-mg-seg="closed|open|plain"   on every row of the segment
+     data-mg-part="work|answer"        the last row holds the answer
+     data-mg-head                      on the first row, with
+     data-mg-worked="7m 56s" and data-mg-steps="12 tool calls, 3 messages"
+     data-mg-live="run|settle"         on a turn pair while its reply runs
+                                       (from Hermes' turn state, held through
+                                       a queued prompt's hand-over)
+   Everything drawn here hangs off those, and the one element of ours a
+   reply gets is the line before its first row (div.mg-line).
+   Motion: nothing here moves under prefers-reduced-motion or with
+   :root[data-mg-motion="off"].
+   ───────────────────────────────────────────────────────────── */
+
+/* ── Left-over live copies ──
+   After a switch to another session and back, Hermes can keep the live copy of
+   a turn beside the stored one. The plugin marks the copy (markStale). */
+:is([data-slot="aui_user-message-root"], [data-slot="aui_assistant-message-root"])[data-mg-stale] { display: none !important; }
+
+/* ── "Worked for 7m 56s · 12 tool calls ›": one line and a hairline above each answer ──
+   The line's room is kept by structure, not by the plugin's marks: the first
+   reply row of a turn (the first in its group, or the first after a queued
+   prompt) has it from the moment it mounts, while it streams and when
+   Hermes swaps in rows from history. So the line landing at the end of a
+   turn, or rows arriving before the plugin has marked them, never changes a
+   row's height (Hermes measures rows as they mount, before the plugin runs,
+   and a late 38px would put the view off the bottom). While the turn runs
+   the room is left empty: a hairline drawn there (a ::before on the live
+   row) more than doubled the long tasks of a 2,000-line streamed reply.
+   The line is an element of ours (div.mg-line, syncLine in plugin.js) put
+   in the response group right before the row, pulled over the row's room
+   by a negative margin (the group is a flex column with a gap; the margin
+   takes the gap back too). Measured (w3-stream, w5-turns): any generated
+   box on a reply row or a response group (::before or ::after, in or out
+   of flow, even content "") puts the compositor commit of scrolling a
+   2,000-line reply at 430 to 3,350 ms against 14 to 36 ms bare; this
+   element, the same pixels, keeps it at bare's. So nothing here draws a
+   ::before or ::after on a reply row. The row stays the button: presses
+   and keys land on it, the line takes no pointer. */
+/* The first reply row of a group is `:nth-child(1 of …)`, not
+   `:not([…] ~ *)`: a `~ *` hands Blink a whole-subtree invalidation for
+   every following sibling, so each line of ours put in a response group (and
+   each row Hermes added) restyled the whole reply after it, about 5,300
+   elements per 2,000-line reply (w6-cost). Four plain selectors rather than
+   one :is() list, each at the list's specificity, (0,3,0): :where() and the
+   repeated [data-slot] keep it there. */
+[data-slot="aui_response-group"] > [data-slot="aui_assistant-message-root"][data-slot]:where(:nth-child(1 of [data-slot="aui_assistant-message-root"])),
+[data-mg-queued] + [data-slot="aui_assistant-message-root"][data-slot],
+[data-mg-queued] + .mg-line + [data-slot="aui_assistant-message-root"],
+[data-slot="aui_assistant-message-root"][data-slot][data-mg-head] { padding-top: 38px; }
+.mg-line {
+  flex: none; display: flex; align-items: center; height: 28px;
+  margin: 0 0 calc(-28px - var(--scaffold-block-gap, 0px)) 12px; /* 12px: where the prose starts; the hairline starts there too */
+  padding-inline: 0 28px; position: relative;
+  /* --mg-text-3 alone measures 4.47:1 on the canvas; a touch of --mg-text-2
+     brings the line over 4.5 without making it louder than the prose. */
+  font-size: 12.5px; line-height: 28px; color: color-mix(in srgb, var(--mg-text-3) 85%, var(--mg-text-2));
+  border-bottom: 1px solid var(--mg-hairline);
+  font-variant-numeric: tabular-nums; white-space: pre; user-select: none; pointer-events: none;
+  transition: color var(--mg-dur-1) var(--mg-ease-out);
+}
+.mg-line > :is(.mg-line-bar, .mg-line-arrow) { display: none; }
+:root[data-mg-tools="hidden"] .mg-line > .mg-line-steps { display: none; }
+
+/* With work behind it, the line is a disclosure */
+:root:not([data-mg-tools="hidden"]) .mg-line[data-mg-steps] > .mg-line-arrow {
+  display: flex; align-items: center; height: 28px; margin: 0 -18px 0 auto; /* 10px from the right, as the text keeps 28px */
+  font: normal 12px/1 codicon; color: var(--mg-text-3); /* an icon needs 3:1; --mg-text-4 is 2.67 */
+  transition: rotate var(--mg-dur-2) var(--mg-ease-out), color var(--mg-dur-1) var(--mg-ease-out);
+}
+:root:not([data-mg-tools="hidden"]) .mg-line[data-mg-steps]:is(.mg-hover, [data-mg-open], [data-mg-focus]) { color: var(--mg-text); }
+:root:not([data-mg-tools="hidden"]) .mg-line[data-mg-steps][data-mg-open] > .mg-line-arrow { rotate: 90deg; color: var(--mg-text-2); }
+/* Keyboard: the plugin makes the row the line's button (role, tabindex,
+   aria-expanded). The ring goes round the line, not round the whole reply:
+   the plugin mirrors the row's :focus-visible onto its line (data-mg-focus). */
+[data-slot="aui_assistant-message-root"][data-mg-head][tabindex]:focus { outline: none; }
+:root:not([data-mg-tools="hidden"]) .mg-line[data-mg-steps][data-mg-focus] {
+  outline: 1px solid var(--mg-text-2); outline-offset: -2px; border-radius: var(--mg-r-button);
+}
+
+/* While the turn runs, the line's room shows that it is working: one short
+   bar where the line will be, pulsing in opacity only, no hairline. The
+   plugin draws it on one line per thread, the running segment's, and turns
+   that line into "Worked for" when the turn ends. With motion off or
+   reduced, it is not drawn. */
+.mg-line[data-mg-working] { border-bottom-color: transparent; }
+.mg-line[data-mg-working] > .mg-line-bar {
+  display: block; width: 24px; height: 2px; border-radius: 1px; background: var(--mg-text-3); opacity: 0.35;
+}
+@media (prefers-reduced-motion: no-preference) {
+  :root:not([data-mg-motion="off"]) .mg-line[data-mg-working] > .mg-line-bar {
+    animation: monograph-pulse 1.4s var(--mg-ease-in-out) infinite;
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .mg-line[data-mg-working] > .mg-line-bar { display: none; }
+}
+:root[data-mg-motion="off"] .mg-line[data-mg-working] > .mg-line-bar { display: none; }
+/* Another indicator of the same turn is on screen, or the line sits above
+   finished text (the plugin says so, data-mg-quiet): no bar. */
+.mg-line[data-mg-working][data-mg-quiet] > .mg-line-bar { display: none; }
+/* Thinking set to "line" (Settings > Monograph): no reasoning while the turn
+   runs, only the working line. It is still there under "Worked for". */
+:root[data-mg-thinking="line"] [data-mg-live] [data-slot="aui_thinking-disclosure"] { display: none; }
+
+/* Closed: only the answer, which is the last piece of prose in the segment's
+   last row. Everything else is the work: earlier rows, tool rows wherever they
+   sit, thinking, running commentary. The first row carries the line, so it
+   stays and its contents go. Anything that needs the reader (an approval, a
+   form) is never folded. The plugin marks each element that folds
+   (data-mg-work="closed|open", see dress() in plugin.js), so these rules are
+   tried on those elements only, not on every element of the page (the
+   earlier :is() lists ending in a descendant combinator cost about 200 ms of
+   style work per traced reply). */
+[data-mg-work="closed"]:not(:has([data-slot^="tool-approval"], input, textarea, [role="radio"], [role="checkbox"])) {
+  display: none !important;
+}
+
+/* A fold is one frame: no height runs (a height animated over 320 ms laid
+   the thread out in every frame, and each step moved the rows above the
+   answer: six layout shifts at every turn end, stress s3). The plugin keeps
+   the reader's place (or the bottom) in that same frame. Only opacity runs,
+   on what appears. */
+@media (prefers-reduced-motion: no-preference) {
+  :root:not([data-mg-motion="off"]) :is([data-mg-anim] [data-mg-work="open"], [data-mg-work="open"][data-mg-anim]) {
+    transition: opacity var(--mg-dur-2) var(--mg-ease-out);
+  }
+  /* The line's room is already there (see above), and so is the line (the
+     working line stays through the end of the turn): only its words fade in,
+     once, when they first appear (the plugin marks that moment). */
+  :root:not([data-mg-motion="off"]) .mg-line[data-mg-anim] > :is(.mg-line-worked, .mg-line-steps) {
+    animation: mg-fade-in var(--mg-dur-3) var(--mg-ease-out);
+  }
+  /* Unfolding: the rows are in place at their full height from the first
+     frame (no height runs, so the thread is laid out once, not once a frame,
+     and no frame shows the room open and empty); they only come up in
+     opacity from a level that is already readable. */
+  @starting-style {
+    :root:not([data-mg-motion="off"]) :is([data-mg-anim] [data-mg-work="open"], [data-mg-work="open"][data-mg-anim]) { opacity: 0.4; }
+  }
+}
+
+/* ── Tool chips ── */
+[data-role="assistant"] [data-slot="tool-block"][data-tool-row] { margin-block: 1px; }
+/* Every row of a run is as tall as the next: a row with nothing to open (no
+   aria-expanded, as most connector and MCP calls) used to keep Hermes' 20px
+   while rows that open were 28px, so the pitch jumped between runs. */
+[data-role="assistant"] [data-tool-row] > div > div > button,
+[data-role="assistant"] [data-tool-row] button[aria-expanded] {
+  align-items: center !important; gap: 6px !important; min-height: 28px;
+  margin-inline: -6px; padding: 0 6px; border-radius: var(--mg-r-button, 8px);
+  transition: background var(--mg-dur-1) var(--mg-ease-out), color var(--mg-dur-1) var(--mg-ease-out);
+}
+[data-role="assistant"] [data-tool-row] button[aria-expanded]:is(:hover, [aria-expanded="true"]) { background: var(--mg-hover); }
+/* The head is DisclosureRow's: button > span.flex-col (the children) > the
+   title row (glyph, label, meta). Named by class, not by :first-child: a
+   structural pseudo-class left of the last compound restyles whole subtrees
+   page-wide (see 40-composer.css). */
+[data-role="assistant"] [data-tool-row] button[aria-expanded] > span.flex-col > span:first-child { gap: 8px !important; }
+/* the label */
+[data-role="assistant"] [data-tool-row] button[aria-expanded] > span.flex-col > span.items-center > span:nth-child(2) {
+  font-size: 12.5px !important; font-weight: 500; color: var(--mg-text-2); text-overflow: ellipsis;
+}
+[data-role="assistant"] [data-tool-row] button[aria-expanded]:is(:hover, [aria-expanded="true"]) > span.flex-col > span.items-center > span:nth-child(2) { color: var(--mg-text); }
+/* the chip: how long it took */
+[data-role="assistant"] [data-tool-row] button[aria-expanded] span.tabular-nums {
+  display: inline-flex; align-items: center; height: 20px; padding: 0 6px;
+  border-radius: var(--mg-r-tag, 6px); background: var(--mg-raised);
+  font: 400 11px/1 ui-monospace, "SF Mono", "JetBrains Mono", Menlo, monospace !important;
+  color: var(--mg-text-3) !important;
+}
+
+/* A run's header ("Ran 5 commands, used 3 tools"). Hermes fades every
+   scaffold row to 0.67, which put this line at about 2.7:1 on the canvas;
+   it is the name of what is under it, so it is drawn at full strength in
+   --mg-text-3 (4.75:1 on the canvas), with the rows' 28px rhythm. */
+[data-role="assistant"] [data-tool-summary][data-conversation-scaffold] { opacity: 1; }
+[data-role="assistant"] [data-tool-summary] button { align-items: center !important; min-height: 28px; color: var(--mg-text-3); }
+[data-role="assistant"] [data-tool-summary] button:is(:hover, :focus-visible) { color: var(--mg-text); --conversation-scaffold-text: var(--mg-text); }
+
+/* ── Thinking trace: a header and a rail ── */
+/* Hermes draws scaffold labels ("Thought for 4s", tool labels) in a mix of
+   its theme base colour; without the skin that can be dark on our canvas. */
+[data-role="assistant"] {
+  --conversation-scaffold-text: var(--mg-text-3);
+  /* text-3, the dimmest step allowed for text (a11y y4): meta labels are
+     words ("4s", counts), not decoration. */
+  --conversation-scaffold-meta: var(--mg-text-3);
+}
+[data-role="assistant"] [data-slot="aui_thinking-disclosure"] button[aria-expanded] {
+  align-items: center !important; gap: 6px !important; min-height: 28px;
+  margin-inline: -6px; padding: 0 6px; border-radius: var(--mg-r-button, 8px);
+  font-size: 12.5px; color: var(--mg-text-3);
+  transition: background var(--mg-dur-1) var(--mg-ease-out), color var(--mg-dur-1) var(--mg-ease-out);
+}
+[data-role="assistant"] [data-slot="aui_thinking-disclosure"] button[aria-expanded]:is(:hover, [aria-expanded="true"]) { background: var(--mg-hover); color: var(--mg-text); }
+[data-role="assistant"] [data-slot="aui_thinking-body"] {
+  margin: 4px 0 6px 7px !important; padding: 2px 0 2px 14px !important;
+  border-left: 1px solid var(--mg-hairline-2, rgba(255, 255, 255, 0.11));
+  font-size: 12.5px; line-height: 1.6; color: var(--mg-text-3);
+}
+/* Live, folded, open (data-mg-think, from the plugin; see thinking() in
+   plugin.js). Live reasoning is read as it comes: drawn at full strength
+   (Hermes fades scaffolding to 0.67, which put text-3 at about 2.5:1), in
+   --mg-text-3, no box. Folded it is the header line alone; open it is the
+   whole text, not the 10rem preview. */
+[data-role="assistant"] [data-slot="aui_thinking-disclosure"][data-mg-think] { opacity: 1; }
+[data-slot="aui_thinking-disclosure"][data-mg-think="folded"] > [data-slot="aui_thinking-body"] {
+  height: 0; margin-block: 0 !important; padding-block: 0 !important; opacity: 0; visibility: hidden; overflow: hidden;
+}
+[data-slot="aui_thinking-disclosure"][data-mg-think="open"] > [data-slot="aui_thinking-body"] { max-height: none; }
+/* Live, the newest lines show: at most four of them (the body's own line
+   height, plus its 2px padding above and below), held to their end without
+   a scroll (a reversed column keeps the end in view). */
+[data-slot="aui_thinking-disclosure"][data-mg-think="live"] > [data-slot="aui_thinking-body"] {
+  max-height: calc(4lh + 4px); overflow: hidden; display: flex; flex-direction: column-reverse;
+}
+/* The height moves only when the plugin says something just happened (the
+   reasoning ended while the reader was at the bottom, or a press). */
+@media (prefers-reduced-motion: no-preference) {
+  :root:not([data-mg-motion="off"]) [data-slot="aui_thinking-disclosure"][data-mg-anim] > [data-slot="aui_thinking-body"] {
+    interpolate-size: allow-keywords;
+    transition: height var(--mg-dur-3) var(--mg-ease-out), opacity var(--mg-dur-2) var(--mg-ease-out), margin var(--mg-dur-3) var(--mg-ease-out), padding var(--mg-dur-3) var(--mg-ease-out), visibility var(--mg-dur-3) allow-discrete;
+  }
+}
+
+/* ── Streamed text: each new block rises into place while the reply runs ──
+   Keyed to data-mg-live="run", which the plugin sets once when a turn starts
+   (and turns to "settle" when it ends, so rows Hermes swaps in from history
+   do not arrive again), and to data-mg-arrived, which it writes on each
+   element once its arrival has played, so nothing can start it twice. A running marker that blinks out and back (as
+   Hermes' do between tool calls) no longer restarts every block's animation,
+   and history never animates. Opacity and transform only. Code blocks and
+   tables (div wrappers) are left out: Hermes hides and shows them while they
+   stream, and each time would restart the fade. The blocks are named by tag
+   (every non-div block markdown draws): a last compound that matches any
+   element, as `:not(div, …)` did, made the data-mg-live flip at the end of a
+   turn restyle the whole turn pair, about 5,300 elements (w6-cost). */
+@media (prefers-reduced-motion: no-preference) {
+  :root:not([data-mg-motion="off"]) [data-slot="aui_turn-pair"][data-mg-live="run"] [data-slot="aui_assistant-message-content"] > [data-slot="tool-block"]:not([data-mg-arrived]),
+  :root:not([data-mg-motion="off"]) [data-slot="aui_turn-pair"][data-mg-live="run"] [data-slot="aui_assistant-message-content"] > .aui-md > :is(p, ul, ol, h1, h2, h3, h4, h5, h6, blockquote, hr, pre, table, button, img, section, details, figure, span, a):not([data-mg-arrived]) {
+    animation: mg-stream-in var(--mg-dur-3) var(--mg-ease-out) both;
+  }
+}
+@keyframes mg-stream-in { from { opacity: 0; transform: translateY(4px); } to { opacity: 1; transform: none; } }
+
+/* ── Compaction note ──
+   Hermes shows its own "[CONTEXT COMPACTION …" / "[STILL IN PROGRESS …" note
+   as a prompt. The plugin marks it (data-mg-compaction="closed|open"); it is
+   drawn as one quiet line that opens on a press. The node stays. */
+[data-slot="aui_user-message-root"][data-mg-compaction] {
+  position: relative !important; top: auto !important;
+  padding-top: 28px; cursor: default;
+}
+[data-slot="aui_user-message-root"][data-mg-compaction]::before {
+  content: "Context compacted";
+  position: absolute; top: 0; left: 0; right: 0; height: 28px;
+  display: flex; align-items: center; padding-inline: 12px 28px;
+  font-size: 12.5px; line-height: 28px; color: var(--mg-text-3);
+  border-bottom: 1px solid var(--mg-hairline);
+  cursor: pointer; user-select: none;
+  transition: color var(--mg-dur-1) var(--mg-ease-out);
+}
+[data-slot="aui_user-message-root"][data-mg-compaction]::after {
+  content: "\eab6"; position: absolute; top: 0; right: 10px; height: 28px;
+  display: flex; align-items: center; font: normal 12px/1 codicon; color: var(--mg-text-3);
+  pointer-events: none; transition: rotate var(--mg-dur-2) var(--mg-ease-out);
+}
+[data-slot="aui_user-message-root"][data-mg-compaction]:hover::before { color: var(--mg-text); }
+[data-slot="aui_user-message-root"][data-mg-compaction="open"]::after { rotate: 90deg; }
+[data-slot="aui_user-message-root"][data-mg-compaction="open"] { padding-top: 36px; }
+[data-slot="aui_user-message-root"][data-mg-compaction="closed"] > :is(div, span, button, p, section) { display: none !important; }
+
+/* ── On hover: when it was sent, and copy ── */
+.mg-ucopy {
+  pointer-events: auto; display: grid; place-items: center; width: 24px; height: 24px;
+  border: 0; border-radius: 6px; background: transparent; color: var(--mg-text-3); cursor: pointer;
+  transition: background var(--mg-dur-1) var(--mg-ease-out), color var(--mg-dur-1) var(--mg-ease-out);
+}
+.mg-ucopy:hover { background: var(--mg-active); color: var(--mg-text); }
+.mg-ucopy::before { content: "\ebcc"; font: normal 14px/1 codicon; -webkit-font-smoothing: antialiased; }
+.mg-ucopy[data-done]::before { content: "\eab2"; color: var(--mg-text); }
+@media (prefers-reduced-motion: no-preference) {
+  :root:not([data-mg-motion="off"]) .mg-ucopy[data-done]::before { animation: mf-pop var(--mg-dur-2) var(--mg-ease-spring); }
+}
+[data-slot="aui_msg-actions"] time, [data-slot="aui_user-bubble-actions"] time { color: var(--mg-text-3) !important; }

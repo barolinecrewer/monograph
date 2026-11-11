@@ -1,0 +1,30 @@
+/* Cards that ask the user for something. A raised tile with a hairline edge;
+   the one action that moves things forward is the only white button. */
+[data-slot="tool-approval-stack"] :is(.rounded-xl.border, [data-slot="card-stack-edge"]) {
+  border: 1px solid var(--mg-hairline-strong) !important;
+  border-radius: var(--mg-r-card) !important;
+  background-color: var(--mg-raised) !important;
+  box-shadow: none !important;
+}
+[data-slot="tool-approval-card"] pre { color: var(--mg-text) !important; }
+/* An approval is a command Hermes judged dangerous: its card has a solid
+   edge in the second text step (other cards: a hairline), and the line that
+   says what it asks is set heavier. */
+[data-slot="tool-approval-stack"] :is(.rounded-xl.border, [data-slot="card-stack-edge"]):has([data-slot="tool-approval-card"]) { border-color: var(--mg-text-2) !important; }
+/* (the header row, then the span after its terminal glyph; no structural
+   pseudo-class left of the last compound: see 40-composer.css) */
+[data-slot="tool-approval-card"] > div.pt-2 > .codicon + span { font-weight: 600; color: var(--mg-text); }
+/* The card spans the thread's column, edge to edge with the work line above
+   it, instead of stopping at Hermes' 36rem and leaving a ragged right edge. */
+[data-slot="tool-approval-stack"] { max-width: none !important; }
+[data-slot="tool-approval-actions"] { gap: 6px !important; padding: 4px 10px 10px !important; }
+/* The Nous Portal card (Settings > Providers) draws a travelling blue-to-
+   orange ring. Chrome is grayscale: the ring keeps its motion in two steps
+   of the text scale. */
+.arc-border.arc-nous { --arc-c1: var(--mg-text-2) !important; --arc-c2: var(--mg-text-4) !important; }
+/* The line above an approval card ("Running rm -rf …") is a scaffold row:
+   Hermes fades those to two thirds, which put it under its contrast minimum.
+   It is the only thing saying what waits, so it reads at the third step. */
+[data-approval-activity]:is([data-conversation-scaffold], :has([data-conversation-scaffold])),
+[data-approval-activity] [data-conversation-scaffold] { opacity: 1 !important; }
+[data-approval-activity] { --conversation-scaffold-text: var(--mg-text-3); color: var(--mg-text-3); }

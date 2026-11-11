@@ -1,0 +1,140 @@
+/* Shell: one flat opaque field, zones separated by hairlines. */
+
+/* ── Field: glass off ──
+   Hermes paints the window from <body> and, when its Glass setting is on,
+   turns every surface transparent. Monograph is flat: the body is opaque and
+   every surface token resolves to the same field colour, whatever that
+   setting says. Text and strokes move onto the Monograph steps here too, so
+   anything Hermes ships later inherits them. */
+:root {
+  --ui-bg-chrome: var(--mg-surface) !important;
+  --ui-bg-sidebar: var(--mg-surface) !important;
+  --ui-bg-editor: var(--mg-surface) !important;
+  --ui-chat-surface-background: var(--mg-surface) !important;
+  --ui-sidebar-surface-background: var(--mg-surface) !important;
+  --ui-editor-surface-background: var(--mg-surface) !important;
+  --ui-terminal-surface-background: var(--mg-surface) !important;
+  --background: var(--mg-surface) !important;
+  --foreground: var(--mg-text) !important;
+
+  --ui-text-primary: var(--mg-text) !important;
+  --ui-text-secondary: var(--mg-text-2) !important;
+  --ui-text-tertiary: var(--mg-text-3) !important;
+  --ui-text-quaternary: var(--mg-text-4) !important;
+
+  --ui-stroke-primary: var(--mg-hairline-bold) !important;
+  --ui-stroke-secondary: var(--mg-hairline-strong) !important;
+  --ui-stroke-tertiary: var(--mg-hairline) !important;
+
+  /* Fills and field edges Hermes mixes from its theme foreground, which the
+     skin flips (dark text without it, light with it): pinned, so the plugin
+     looks the same with and without the skin (rig: MG_RIG_SKIN=1, pixels). */
+  --ui-bg-secondary: var(--mg-press) !important;
+  --ui-bg-tertiary: var(--mg-active) !important;
+  --ui-bg-quaternary: var(--mg-hover) !important;
+  --ui-row-active-background: var(--mg-active) !important;
+  --ui-control-active-background: var(--mg-active) !important;
+  --dt-input-border: 7% !important;
+  --dt-input-inset: none !important;
+}
+:root body { background: var(--mg-surface) !important; }
+
+/* Hide bottom status bar footer */
+[data-slot="statusbar"] { display: none !important; }
+/* Hide bottom Terms/Privacy footer */
+[data-slot="butterbar"]:has(a[href*="nousresearch.com/terms"]) { display: none !important; }
+/* Strict black & white: neutralise any leftover accent */
+:root { --ui-accent: #f2f2f2 !important; }
+/* Except where a service logo is drawn (data-mg-service, src/modules/00-
+   services.js): logos keep their colour. A row that is a service row, or
+   that holds one, is not filtered whole; 34-services.css greys what lies
+   beside the logo in a tool row. The :has() is asked of these rows only. */
+[data-role="system"]:not([data-mg-service]):not(:has([data-mg-service])),
+[data-conversation-scaffold]:not([data-mg-service]):not(:has([data-mg-service])) { filter: grayscale(1) !important; }
+/* Selection = a quiet fill and brighter text, not boxes. */
+/* Corner radius scale. Hermes sets --radius-scalar on :root only and every
+   rounded utility reads it by inheritance, so :root is enough; setting it on
+   every element (as this rule did) made each one carry its own copy and cost
+   style time on every restyle of a long thread. */
+:root { --radius-scalar: 1.1 !important; }
+:root {
+  --ui-control-active-background: var(--mg-hover) !important;
+  --chrome-action-hover: var(--mg-hover) !important;
+  --sidebar-accent: var(--mg-hover) !important;
+  --ui-row-open-background: rgba(255, 255, 255, 0.02) !important;
+  --ui-row-active-background: var(--mg-active) !important;
+}
+
+/* ── Zone dividers ──
+   The resize sash is the one element that exists exactly where two visible
+   zones meet, so it carries the hairline. Hovering it brightens the line:
+   that is the resize affordance. */
+/* (the sash's own hairline spans; named, not `> *`: see 40-composer.css on
+   what a last compound that matches anything costs when `role` changes) */
+[role="separator"][data-sash-overlap] > span { opacity: 0 !important; }
+[role="separator"][data-sash-overlap]::after {
+  content: ""; position: absolute; pointer-events: none;
+  background: var(--mg-hairline);
+  transition: background-color var(--mg-dur-1) var(--mg-ease-out);
+}
+[role="separator"][data-sash-overlap].cursor-col-resize::after { inset: 0 auto 0 0; width: 1px; }
+[role="separator"][data-sash-overlap].cursor-row-resize::after { inset: 0 0 auto 0; height: 1px; }
+[role="separator"][data-sash-overlap]:is(:hover, :active)::after { background: var(--mg-hairline-bold); }
+
+/* ── Headers ── one hairline under every zone header, no tint */
+[data-panel-header] { border-bottom: 1px solid var(--mg-hairline) !important; }
+
+/* Tabs (Sessions/Bots, pane tabs): no pills, no underline; state is text colour */
+[data-slot="sidebar"] [role="tablist"], [data-slot="sidebar"] [role="radiogroup"], [data-slot="tabs-list"] {
+  background: transparent !important; box-shadow: none !important; border: 0 !important;
+}
+[data-slot="sidebar"] [role="tablist"] > :is(button, a, div, span, label), [data-slot="sidebar"] [role="radiogroup"] > :is(button, a, div, span, label),
+[data-slot="tabs-trigger"], [data-slot="pane-tab"] {
+  background: transparent !important; box-shadow: none !important; border-color: transparent !important;
+  opacity: .38; transition: opacity var(--mg-dur-2) var(--mg-ease-out);
+}
+[data-slot="sidebar"] [role="radiogroup"] > :is(button, a, div, span, label):hover, [data-slot="tabs-trigger"]:hover, [data-slot="pane-tab"]:hover { opacity: .7; }
+[data-slot="sidebar"] [role="radiogroup"] > [aria-checked="true"],
+[data-slot="sidebar"] [role="tablist"] > [aria-selected="true"],
+[data-slot="tabs-trigger"][data-state="active"], [data-slot="pane-tab"][data-active], [data-slot="pane-tab"][aria-selected="true"] {
+  opacity: 1 !important; background: transparent !important;
+}
+[data-slot="pane-tab"]::after, [data-slot="tabs-trigger"]::after { display: none !important; }
+/* Zone tabs: sentence case, one size, three text steps */
+[data-tree-tab], [data-tree-tab] * { text-transform: none !important; letter-spacing: 0 !important; }
+[data-tree-tab] {
+  font-size: var(--mg-fs-meta) !important; color: var(--mg-text-3) !important;
+  transition: color var(--mg-dur-1) var(--mg-ease-out);
+}
+[data-tree-tab]:hover { color: var(--mg-text-2) !important; }
+[data-tree-tab][data-active="true"] { color: var(--mg-text) !important; }
+/* Long tab titles end in an ellipsis instead of a hard cut */
+[data-tree-tab] .truncate { text-overflow: ellipsis !important; }
+
+/* Top-right: hide settings + layout editor. Both stay reachable: Settings from
+   the surfaces menu and ⌘,; the layout editor from ⌘K ("Toggle layout edit
+   mode") and ⌘⇧\. */
+button[aria-label="Open settings"], button[aria-label="Layout editor"] { display: none !important; }
+/* Advanced mode keeps two more of Hermes' buttons in that cluster, HUD mode
+   and Swap sidebar sides. The surfaces button holds the corner (14-surfaces.css),
+   so the cluster steps left of it, onto the same line, with the corner row's
+   look. Without this, Swap sat exactly on the surfaces button. */
+/* Keyed on :root[data-mg-surfaces] (src/modules/05-state.js), not on
+   a document-wide :has() on that button, which was asked again on
+   every button added anywhere. `html:root` keeps that rule's specificity. */
+html:root[data-mg-surfaces] [data-titlebar-cluster="right"] {
+  right: calc(12px + 24px + 2px) !important; top: calc(var(--mg-lights-y, 17px) - 12px) !important;
+  height: 24px; align-items: center !important; gap: 2px !important; translate: none !important;
+}
+[data-titlebar-cluster="right"] > button {
+  width: 24px !important; height: 24px !important; padding: 0 !important; border-radius: var(--mg-r-tag) !important;
+  color: var(--mg-text-3) !important; background: transparent !important;
+  transition: background-color var(--mg-dur-1) var(--mg-ease-out), color var(--mg-dur-1) var(--mg-ease-out);
+}
+[data-titlebar-cluster="right"] > button:hover { background: var(--mg-active) !important; color: var(--mg-text) !important; }
+[data-titlebar-cluster="right"] > button .codicon { font-size: 15px !important; }
+/* The left sidebar toggle lives in the corner (12-corner.css). No right one (⌘J still opens Files). */
+button:is([aria-label^="Hide right sidebar"], [aria-label^="Show right sidebar"]),
+#bb-collapse, [data-tour="right-pane-toggle"] { display: none !important; }
+/* No minimized-zone rails (vertical "Files" strip etc.) — ⌘J still opens Files */
+[data-tree-split] > div[style*="0 0 1.75rem"] { display: none !important; }

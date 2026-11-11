@@ -1,0 +1,177 @@
+/* Motion for the chrome that has no section of its own: floating layers,
+   Hermes' own controls, the sidebar, side panes and full-page overlays.
+   Keyframes and tokens are in 05-motion.css; the kill switch there cuts all
+   of this to nothing.
+
+   Hermes marks its Radix layers for tw-animate (animate-in, fade-in-0,
+   zoom-in-95 …) but does not load that stylesheet, so out of the box its
+   menus, popovers and dialogs appear and vanish in one frame. These rules
+   give every layer one enter and one exit. */
+
+/* ── Floating layers: which side they come from ──
+   Radix puts the side the layer opened on in data-side. The layer starts a
+   few pixels toward its trigger and settles away from it. */
+:is([data-slot="dropdown-menu-content"], [data-slot="dropdown-menu-sub-content"],
+    [data-slot="context-menu-content"], [data-slot="context-menu-sub-content"],
+    [data-slot="popover-content"], [data-slot="select-content"], [data-slot="tooltip-content"]) {
+  &[data-side="bottom"] { --mg-lx: 0px; --mg-ly: calc(var(--mg-layer-shift) * -1); }
+  &[data-side="top"] { --mg-lx: 0px; --mg-ly: var(--mg-layer-shift); }
+  &[data-side="left"] { --mg-lx: var(--mg-layer-shift); --mg-ly: 0px; }
+  &[data-side="right"] { --mg-lx: calc(var(--mg-layer-shift) * -1); --mg-ly: 0px; }
+}
+
+/* Menus, popovers, selects: in over one long step, out over one short one.
+   Transform origin is Radix's (the trigger's edge), which Hermes already sets
+   on these elements. */
+:is([data-slot="dropdown-menu-content"], [data-slot="dropdown-menu-sub-content"],
+    [data-slot="context-menu-content"], [data-slot="context-menu-sub-content"],
+    [data-slot="popover-content"], [data-slot="select-content"]) {
+  &[data-state="open"] { animation: mg-layer-in var(--mg-dur-2) var(--mg-ease-out); }
+  &[data-state="closed"] { animation: mg-layer-out var(--mg-dur-1) var(--mg-ease-in) both; }
+}
+
+/* A dropdown menu's exit is played by a copy put back after Hermes removed
+   it (src/modules/50-motion.js: Hermes' providers keep Radix from waiting for
+   it). Only the menu itself moves; the effort slider's fill and handle (the
+   checked radio row's ::before and ::after, 41-effort.css: the only parts of
+   a menu that animate) stand still, so the handle does not pop again on its
+   way out. Named rather than `[data-mg-ghost] … *`: a rule whose last part
+   matches any element is checked against a whole subtree on every change of
+   an attribute named on its left (data-slot here), ghost or not. */
+[data-mg-ghost] [role="menuitemradio"][aria-checked="true"]::before,
+[data-mg-ghost] [role="menuitemradio"][aria-checked="true"]::after { animation: none !important; transition: none !important; }
+
+/* Tooltips: smaller travel, short both ways. A tooltip that opens straight
+   after another (Radix: instant-open) appears at once, so moving along a row
+   of buttons does not flicker. */
+.tooltip-bubble[data-slot="tooltip-content"] {
+  --mg-layer-shift: 2px;
+
+  &[data-state="delayed-open"] { animation: mg-layer-in var(--mg-dur-1) var(--mg-ease-out); }
+  &[data-state="instant-open"] { animation: none; }
+  &[data-state="closed"] { animation: mg-layer-out var(--mg-dur-1) var(--mg-ease-in) both; }
+}
+
+/* Dialogs sit in the middle: they only scale and fade. The command palette
+   hangs from the top, so it also comes down a few pixels. Overlays fade. */
+[data-slot="dialog-content"] {
+  --mg-lx: 0px; --mg-ly: 0px;
+
+  &[data-state="open"] { animation: mg-layer-in var(--mg-dur-2) var(--mg-ease-out); }
+  &[data-state="closed"] { animation: mg-layer-out var(--mg-dur-1) var(--mg-ease-in) both; }
+}
+[role="dialog"][data-state]:not([data-slot]) {
+  --mg-lx: 0px; --mg-ly: calc(var(--mg-layer-shift) * -1);
+
+  &[data-state="open"] { animation: mg-layer-in var(--mg-dur-2) var(--mg-ease-out); }
+  &[data-state="closed"] { animation: mg-layer-out var(--mg-dur-1) var(--mg-ease-in) both; }
+}
+[data-slot="dialog-overlay"] {
+  &[data-state="open"] { animation: mg-fade-in var(--mg-dur-2) var(--mg-ease-out); }
+  &[data-state="closed"] { animation: mg-fade-out var(--mg-dur-1) var(--mg-ease-in) both; }
+}
+
+/* A layer on its way out is already gone as far as the pointer goes: a click
+   during the exit lands on what is underneath. */
+:is([data-slot="dropdown-menu-content"], [data-slot="dropdown-menu-sub-content"],
+    [data-slot="context-menu-content"], [data-slot="context-menu-sub-content"],
+    [data-slot="popover-content"], [data-slot="select-content"],
+    [data-slot="dialog-content"], [data-slot="dialog-overlay"], [role="dialog"])[data-state="closed"] {
+  pointer-events: none !important;
+}
+
+/* ── Full-page overlays (Settings, Agents, Scheduled jobs, Capabilities …) ──
+   They cover the chat, so fading them in shows no empty canvas: the chat is
+   underneath until the card is there. They leave in one frame (Hermes
+   unmounts them), as the chat is already drawn beneath. */
+[data-overlay-surface] { animation: mg-fade-in var(--mg-dur-2) var(--mg-ease-out); }
+[data-overlay-surface] > div > [data-glass-raised] {
+  --mg-lx: 0px; --mg-ly: 0px;
+  animation: mg-layer-in var(--mg-dur-2) var(--mg-ease-out);
+}
+
+/* ── Sidebar ──
+   Hermes collapses it by taking its zone out of the layout and expands it
+   by putting it back, in one frame each. The width change is layout and is
+   left alone; coming back, the sidebar's content fades in. Collapsing has
+   nothing left to animate. */
+[data-slot="sidebar"] { animation: mg-fade-in var(--mg-dur-2) var(--mg-ease-out); }
+
+/* ── Side panes ──
+   Files / Review open as a zone of the layout (no transition there either);
+   the pane's content fades in. Kept-alive panes (Terminal, Browser) are shown
+   and hidden in place; they fade in when shown. Hiding is immediate, because
+   the zone around them is already gone. */
+[data-tree-group] aside { animation: mg-fade-in var(--mg-dur-2) var(--mg-ease-out); }
+/* The Agent pane (ours, 20-agent-panel.js) opens the same way: its zone is
+   there at once, its content fades in. It mounted in one frame before, a
+   hard cut beside a chat that otherwise eases everything. It mounts once
+   per opening, so nothing here replays on a change inside it. */
+.mg-agent { animation: mg-fade-in var(--mg-dur-2) var(--mg-ease-out); }
+[data-pane-host]:not([aria-hidden="true"]) {
+  transition: opacity var(--mg-dur-2) var(--mg-ease-out);
+  @starting-style { opacity: 0; }
+}
+[data-pane-host][aria-hidden="true"] { opacity: 0; }
+
+/* ── Hermes' own controls ──
+   Hermes gives its buttons (and titlebar controls, tabs, links) a
+   `transition-all`, which also animates the focus ring (box-shadow, outline)
+   and any change of size. Colour, opacity and transform only; the ring comes
+   and goes at once and a size change is not eased. */
+button[data-slot="button"],
+:where(button, [role="button"], [role="tab"], a).transition-all {
+  transition-property: color, background-color, border-color, text-decoration-color, opacity, transform, translate, scale, rotate;
+  transition-duration: var(--mg-dur-1);
+  transition-timing-function: var(--mg-ease-out);
+}
+button[data-slot="button"]:not(:disabled, [data-variant="link"], [data-variant="text"], [data-variant="textStrong"], [data-variant="grip"]):active {
+  transform: scale(var(--mg-press-scale));
+}
+
+/* Hermes' other small transitions (colour, opacity, a caret turning) run at
+   Tailwind's 150ms on its own curve. Outside the thread they take the
+   chrome's step and curve; the thread's motion belongs to the chat
+   sections. */
+:where(.transition-colors, .transition-opacity, .transition-transform):not([data-slot="aui_thread-viewport"] *) {
+  transition-duration: var(--mg-dur-1);
+  transition-timing-function: var(--mg-ease-out);
+}
+
+/* Switches: the track changes colour in one short step and the thumb glides.
+   Focus (a ring and a border colour) is not animated. */
+[data-slot="switch"] { transition: background-color var(--mg-dur-1) var(--mg-ease-out); }
+[data-slot="switch-thumb"] {
+  transition: translate var(--mg-dur-2) var(--mg-ease-out), background-color var(--mg-dur-1) var(--mg-ease-out);
+}
+
+/* ── A session at work (sidebar) ──
+   Its title breathes while the turn runs. It used to sweep a gradient
+   across the text (background-position, 20-sidebar.css): a main-thread
+   paint on every frame for as long as a turn runs. Opacity alone stays on
+   the compositor; the title keeps its own colour. Ends when Hermes drops
+   data-working with the turn. */
+[data-slot="sidebar"] :is(.row-hover[data-working="true"], .mf-srow[data-working="true"]) :is(.hover-marquee-inner, .mf-stitle) {
+  background: none;
+  -webkit-background-clip: border-box;
+  background-clip: border-box;
+  color: var(--mg-text) !important;
+  animation: mg-working 1.8s var(--mg-ease-in-out) infinite;
+}
+@keyframes mg-working { 0%, 100% { opacity: 0.7; } 50% { opacity: 1; } }
+
+/* ── The empty chat's greeting (40-composer.css) ──
+   It faded in as a ::before of the composer dock, and a pseudo-element
+   starts its animation again whenever it is made again: Hermes remounts the
+   dock when an overlay closes and when the model menu opens, so the
+   greeting blinked out and back each time (the film, m9, model-open). It is
+   simply there with the empty chat now; home's own rows still arrive. */
+:root[data-mg-empty-chat][data-mg-empty-chat][data-mg-empty-chat] [data-slot="composer-dock"]:not([data-popped-out])::before { animation: none; }
+
+/* ── Copy turning into a check (33-turns.css draws both glyphs) ──
+   The check grew from nothing (mf-pop: scale 0), so between the copy glyph
+   leaving and the check being big enough to read there was an empty frame
+   or two (the film, m9, copy). It now starts small and faint where the copy
+   glyph was and settles in one long step. */
+:root:not([data-mg-motion="off"]) .mg-ucopy[data-done]::before { animation: mg-check-in var(--mg-dur-2) var(--mg-ease-out); }
+@keyframes mg-check-in { from { opacity: 0.2; transform: scale(0.7); } }

@@ -1,0 +1,40 @@
+{
+  "//": "own = hooks our own code creates, not Hermes (attribute names or full keys as the doctor prints them). Anything starting mg-, mf-, bb- or monograph is ours without an entry. overrides = hooks Hermes builds at runtime, mapped to the source string that proves they still exist. Sorted, one entry per line: add with  node scripts/doctor.mjs --own '<hook>'.",
+  "own": [
+    "[data-slot=\"context-ring\"]",
+    "data-bloub-wrap",
+    "data-done",
+    "data-kind",
+    "data-mode",
+    "data-on",
+    "data-preview"
+  ],
+  "overrides": {
+    ".shimmer-bg": "tw-shimmer",
+    "[data-aria-hidden]": "from 'radix-ui'",
+    "[data-pane-tab-id=\"hermes-bots:routines\"]": "id: 'routines'",
+    "[style*=\"#6cb6ff\"]": "github-dark-dimmed",
+    "[style*=\"#768390\"]": "github-dark-dimmed",
+    "[style*=\"#8ddb8c\"]": "github-dark-dimmed",
+    "[style*=\"#96d0ff\"]": "github-dark-dimmed",
+    "[style*=\"#dcbdfb\"]": "github-dark-dimmed",
+    "[style*=\"#f47067\"]": "github-dark-dimmed",
+    "[style*=\"#f69d50\"]": "github-dark-dimmed",
+    "[style*=\"0 0 1.75rem\"]": "MINIMIZED_TRACK = '1.75rem'",
+    "[style*=\"rgb(10, 48, 105)\"]": "github-dark-dimmed",
+    "[style*=\"rgb(108, 182, 255)\"]": "github-dark-dimmed",
+    "[style*=\"rgb(110, 119, 129)\"]": "github-dark-dimmed",
+    "[style*=\"rgb(118, 131, 144)\"]": "github-dark-dimmed",
+    "[style*=\"rgb(130, 80, 223)\"]": "github-dark-dimmed",
+    "[style*=\"rgb(141, 219, 140)\"]": "github-dark-dimmed",
+    "[style*=\"rgb(149, 56, 0)\"]": "github-dark-dimmed",
+    "[style*=\"rgb(150, 208, 255)\"]": "github-dark-dimmed",
+    "[style*=\"rgb(17, 99, 41)\"]": "github-dark-dimmed",
+    "[style*=\"rgb(207, 34, 46)\"]": "github-dark-dimmed",
+    "[style*=\"rgb(220, 189, 251)\"]": "github-dark-dimmed",
+    "[style*=\"rgb(244, 112, 103)\"]": "github-dark-dimmed",
+    "[style*=\"rgb(246, 157, 80)\"]": "github-dark-dimmed",
+    "[style*=\"rgb(5, 80, 174)\"]": "github-dark-dimmed",
+    "[style*=\"rgb(87, 96, 106)\"]": "github-dark-dimmed"
+  }
+}

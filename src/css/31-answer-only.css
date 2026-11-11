@@ -1,0 +1,9 @@
+/* Tool calls are an option (Settings > Plugins > Monograph, or "Toggle tool
+   calls" in the palette). Hidden keeps a reply to its answer: tool rows, run summaries
+   and thinking go; anything that needs the user (approvals, questions) stays. */
+:root[data-mg-tools="hidden"] [data-role="assistant"] [data-slot="tool-block"]:not(:has([data-slot^="tool-approval"], input, textarea, [role="radio"], [role="checkbox"])),
+:root[data-mg-tools="hidden"] [data-role="assistant"] [data-tool-summary]:not(:has([data-slot^="tool-approval"])),
+:root[data-mg-tools="hidden"] [data-role="assistant"] [data-slot="aui_thinking-disclosure"],
+:root[data-mg-tools="hidden"] [data-role="assistant"] [data-slot="connector-directory-receipt"] {
+  display: none !important;
+}

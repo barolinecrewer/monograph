@@ -1,0 +1,53 @@
+/* Top right: one button that opens any surface, panel or page. It is a Hermes
+   titlebar tool, so Hermes places and labels it; these rules put it on the
+   band's centre line and give it the corner row's look. The glyph inside is
+   the menu's trigger (see SurfacesGlyph in plugin.js) and fills the button. */
+div:where(.fixed):not([data-titlebar-cluster]):has(> button[data-tour="mg-surfaces"]) {
+  /* Hermes keeps room here for its settings and layout buttons, which this
+     theme hides (10-shell.css); the tab bar reserves that room too, so the
+     button takes it instead of sitting over the last tab. */
+  top: calc(var(--mg-lights-y, 17px) - 12px) !important; right: var(--titlebar-tools-right, 12px) !important;
+  height: 24px; align-items: center !important; gap: 2px !important;
+}
+button[data-tour="mg-surfaces"] {
+  position: relative; width: 24px !important; height: 24px !important; padding: 0 !important;
+  border-radius: var(--mg-r-tag) !important; color: var(--mg-text-3) !important; background: transparent !important;
+  transition: background-color var(--mg-dur-1) var(--mg-ease-out), color var(--mg-dur-1) var(--mg-ease-out), transform var(--mg-dur-1) var(--mg-ease-out);
+}
+button[data-tour="mg-surfaces"]:is(:hover, :has([aria-expanded="true"])) { background: var(--mg-active) !important; color: var(--mg-text) !important; }
+button[data-tour="mg-surfaces"]:active { transform: scale(var(--mg-press-scale)); }
+.mg-surfaces-hit { position: absolute; inset: 0; display: grid; place-items: center; border-radius: inherit; }
+.mg-surfaces-hit .codicon { font-size: 15px !important; }
+
+/* The menu: a title, then one row per surface with its letter on a keycap */
+[data-slot="dropdown-menu-content"].mg-surfaces-menu { width: 232px; padding: 4px !important; }
+.mg-surfaces-title { padding: 7px 8px 6px; font-size: 11.5px; font-weight: 500; color: var(--mg-text-3); }
+.mg-surface-row {
+  display: flex !important; align-items: center !important; gap: 10px;
+  height: 30px; padding: 0 6px 0 8px !important; font-size: 12.5px; color: var(--mg-text);
+}
+.mg-surface-row > i { font-size: 14px !important; color: var(--mg-text-3); transition: color var(--mg-dur-1) var(--mg-ease-out); }
+.mg-surface-row > span { flex: 1; min-width: 0; }
+.mg-surface-row > kbd {
+  display: grid; place-items: center; width: 18px; height: 18px; border-radius: 5px;
+  background: var(--mg-active); font: 500 10.5px/1 var(--mg-font); color: var(--mg-text-2);
+  transition: color var(--mg-dur-1) var(--mg-ease-out), background-color var(--mg-dur-1) var(--mg-ease-out);
+}
+.mg-surface-row:is(:hover, [data-highlighted]) > :is(i, kbd) { color: var(--mg-text); }
+.mg-surface-row:is(:hover, [data-highlighted]) > kbd { background: var(--mg-press); }
+.mg-surface-row[data-disabled] { opacity: 0.4; }
+.mg-surfaces-menu [role="separator"] { height: 1px; margin: 4px 8px !important; background: var(--mg-hairline) !important; }
+
+/* Past the last tab Hermes keeps a 48px handle so a full tab strip still
+   leaves somewhere to drag the window by, and that is where the button sits.
+   Electron lets a drag region that comes later in the document win over an
+   earlier no-drag one, so the handle would swallow every click on the button.
+   The handle stops dragging; a strip inside it drags instead, and ends short
+   of the button. (When the handle is the flexible full row, all of it but
+   that last stretch still drags.) Keyed on :root[data-mg-surfaces], written
+   by src/modules/05-state.js while the button is in the page; `html:root`
+   keeps the specificity of the document-wide :has() it replaces. */
+html:root[data-mg-surfaces] [data-window-drag-handle] { position: relative; -webkit-app-region: no-drag !important; }
+html:root[data-mg-surfaces] [data-window-drag-handle]::before {
+  content: ""; position: absolute; inset: 0 28px 0 0; -webkit-app-region: drag;
+}

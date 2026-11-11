@@ -1,0 +1,59 @@
+name: monograph
+description: Monograph — near-black graphite, soft gray text, monochrome. Layout ships in the monograph desktop plugin.
+
+colors:
+  background: "#0c0c0d"
+
+  ui_accent: "#f2f2f2"
+  banner_accent: "#f2f2f2"
+  ui_tool: "#f2f2f2"
+
+  banner_title: "#f2f2f2"
+  ui_primary: "#f2f2f2"
+  banner_text: "#e6e6e6"
+  ui_text: "#e6e6e6"
+  ui_label: "#b0b0b0"
+  banner_dim: "#8e8e8e"
+  ui_thinking: "#8e8e8e"
+  banner_border: "#232325"
+  ui_border: "#232325"
+
+  ui_ok: "#d4d4d4"
+  ui_warn: "#a8a8a8"
+  ui_error: "#ffffff"
+
+  prompt: "#e6e6e6"
+  input_rule: "#2c2c2f"
+  response_border: "#f2f2f2"
+  status_bar_bg: "#0a0a0b"
+  status_bar_text: "#8e8e8e"
+  status_bar_good: "#d4d4d4"
+  status_bar_warn: "#a8a8a8"
+  status_bar_bad: "#ffffff"
+  status_bar_critical: "#ffffff"
+  session_label: "#e6e6e6"
+  session_border: "#232325"
+
+  diff_added: "#d4d4d4"
+  diff_removed: "#ffffff"
+  syntax_string: "#d4d4d4"
+  syntax_number: "#a8a8a8"
+  syntax_keyword: "#f2f2f2"
+  syntax_comment: "#8e8e8e"
+
+  completion_menu_bg: "#141415"
+  completion_menu_current_bg: "#232325"
+
+branding:
+  prompt_symbol: "❯"
+
+tool_prefix: "┊"
+
+# Desktop-only. The layout CSS lives in the monograph desktop plugin (no 32 KiB
+# cap there). This only holds the first paint until that stylesheet lands, so
+# the app never flashes unstyled; it gives up after 1.5s if the plugin is off.
+customCSS: |
+  html:not([data-mg-ready]) body { opacity: 0; animation: mg-boot 0s linear 1.5s forwards; }
+  html[data-mg-ready] body { animation: mg-in .18s ease-out backwards; }
+  @keyframes mg-boot { to { opacity: 1; } }
+  @keyframes mg-in { from { opacity: 0; } }

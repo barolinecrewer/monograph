@@ -1,0 +1,166 @@
+/* Monograph design tokens.
+   Flat system: depth comes from lightness steps and hairlines, never from
+   shadows or blur. Chrome is neutral grayscale; white is the only accent.
+   Colour is reserved for identity marks (bots, model logos, service logos).
+   Every section reads these; a value that is not a token is a defect. */
+:root {
+  /* Surfaces: one field, two raised steps, one sunk step */
+  --mg-canvas: #0c0c0d;
+  --mg-surface: #141415;
+  --mg-raised: #1c1c1e;
+  --mg-raised-2: #232325;
+  /* One step below the field: where you type and where code sits */
+  --mg-well: #0f0f10;
+
+  /* Lines */
+  --mg-hairline: rgba(255, 255, 255, 0.07);
+  --mg-hairline-strong: rgba(255, 255, 255, 0.11);
+  --mg-hairline-bold: rgba(255, 255, 255, 0.18);
+
+  /* Interaction fills (sit on any surface) */
+  --mg-hover: rgba(255, 255, 255, 0.04);
+  --mg-active: rgba(255, 255, 255, 0.07);
+  --mg-press: rgba(255, 255, 255, 0.1);
+
+  /* Text: four steps, matching Hermes' primary..quaternary. Measured (WCAG
+     ratio) on --mg-canvas / --mg-surface / --mg-raised / --mg-raised-2:
+       --mg-text    17.0 / 16.0 / 14.8 / 13.6
+       --mg-text-2   9.0 /  8.5 /  7.9 /  7.2
+       --mg-text-3   6.0 /  5.6 /  5.2 /  4.8   any text, up to #252526 (4.67)
+       --mg-text-4   4.0 /  3.7 /  3.4 /  3.2   decoration, disabled controls
+                                                 and icons (3:1) only, never text */
+  --mg-text: #ededed;
+  --mg-text-2: #b0b0b0;
+  --mg-text-3: #8e8e8e;
+  --mg-text-4: #707070;
+
+  /* Primary action is white */
+  --mg-primary: #ffffff;
+  --mg-on-primary: #111112;
+
+  /* Selected text: a light veil, the text keeps its own colour */
+  --mg-selection: rgba(255, 255, 255, 0.22);
+  --mg-primary-hover: #e2e2e2;
+
+  /* Radii */
+  --mg-r-window: 15px;
+  --mg-r-composer: 17px;
+  --mg-r-bubble: 13px;
+  --mg-r-card: 11px;
+  --mg-r-chip: 10px;
+  --mg-r-button: 8px;
+  --mg-r-tile: 7px;
+  --mg-r-tag: 6px;
+
+  /* Type. Hermes' own stack already resolves to the platform face (SF on
+     macOS, Segoe on Windows) and is left in charge; --mg-font is for surfaces
+     Monograph builds itself. */
+  --mg-font: -apple-system, BlinkMacSystemFont, "SF Pro Text", "Inter", "Segoe UI", system-ui, sans-serif;
+  --mg-fs-meta: 12px;
+  --mg-fs-ui: 13px;
+  --mg-fs-body: 15px;
+  --mg-lh-body: 1.55;
+
+  /* Space: 4px grid */
+  --mg-s-1: 4px;
+  --mg-s-2: 8px;
+  --mg-s-3: 12px;
+  --mg-s-4: 16px;
+  --mg-s-5: 20px;
+  --mg-s-6: 24px;
+  --mg-s-10: 40px;
+  /* Header height is Hermes' own: the native window buttons are centred on it. */
+  --mg-header-h: 34px;
+
+  /* Motion */
+  --mg-ease-out: cubic-bezier(0.2, 0.8, 0.2, 1);
+  --mg-ease-in-out: cubic-bezier(0.65, 0, 0.35, 1);
+  --mg-ease-spring: cubic-bezier(0.3, 1.6, 0.5, 1);
+  --mg-dur-1: 120ms;
+  --mg-dur-2: 200ms;
+  --mg-dur-3: 320ms;
+}
+
+/* Hermes' own palette, held to grayscale. The theme seeds and the colours
+   Hermes' theme code writes inline on <html> (themes/context.tsx) are its
+   accent (a blue in the default theme: the Switch, focus rings, links,
+   input borders, the palette's highlighted row), its red and its green;
+   !important is what outranks an inline custom property. Chrome is grayscale,
+   so each becomes a step of the scale above. Colour stays only in bot faces
+   and model and service logos, which carry their own (rig: a11y y7). */
+:root {
+  --theme-primary: var(--mg-text) !important;
+  --theme-warm: var(--mg-text-2) !important;
+  --theme-secondary: var(--mg-text-2) !important;
+  --theme-midground: var(--mg-text-4) !important;
+  --theme-accent-soft: var(--mg-raised-2) !important;
+  --ui-warm: var(--mg-text-2) !important;
+  --ui-accent-secondary: var(--mg-text) !important;
+  --dt-primary: var(--mg-primary) !important;
+  --dt-primary-foreground: var(--mg-on-primary) !important;
+  --dt-primary-solid: var(--mg-primary) !important;
+  --dt-primary-solid-foreground: var(--mg-on-primary) !important;
+  --dt-accent: var(--mg-active) !important;
+  --dt-accent-foreground: var(--mg-text) !important;
+  --dt-ring: var(--mg-text-3) !important;
+  --dt-composer-ring: var(--mg-text-4) !important;
+  --dt-destructive: var(--mg-text) !important;
+  --dt-destructive-foreground: var(--mg-on-primary) !important;
+  --ui-success: var(--mg-text-2) !important;
+  --ui-selection-background: var(--mg-selection) !important;
+  --dt-border: var(--mg-hairline-strong) !important;
+  /* Raised and input fields: Hermes' light-mode values (#fcfcfc) leak in when
+     no dark skin is applied (the rig's case): the palette, keycaps. */
+  --ui-bg-elevated: var(--mg-raised) !important;
+  --ui-bg-input: var(--mg-well) !important;
+  /* The command palette's field is painted with the bubble colour (Hermes'
+     HUD_SURFACE); light mode's is near white. Monograph's bubbles set their
+     own (--dt-user-bubble, 30-chat.css), so this only reaches the palette. */
+  --ui-chat-bubble-background: var(--mg-raised) !important;
+  /* Diff rows (35-controls.css adds the +/− marks): added lines a lighter
+     fill and a light solid edge, removed lines a darker fill and a dim dashed
+     edge, text on the first step for both. */
+  --ui-diff-add-background: var(--mg-press) !important;
+  --ui-diff-add-border: var(--mg-text-2) !important;
+  --ui-diff-add-foreground: var(--mg-text) !important;
+  --ui-diff-remove-background: var(--mg-canvas) !important;
+  --ui-diff-remove-border: var(--mg-text-4) !important;
+  --ui-diff-remove-foreground: var(--mg-text) !important;
+  /* Transcript scaffolding (tool labels, the approval's activity line) is a
+     mix of Hermes' theme foreground, which is dark without the skin. */
+  --conversation-scaffold-text: var(--mg-text-3) !important;
+  --conversation-scaffold-meta: var(--mg-text-3) !important;
+  /* Hermes' named hues (status text, the memory tool's gold-to-purple title) */
+  --ui-red: var(--mg-text) !important;
+  --ui-orange: var(--mg-text-2) !important;
+  --ui-yellow: var(--mg-text-2) !important;
+  --ui-green: var(--mg-text-2) !important;
+  --ui-cyan: var(--mg-text-3) !important;
+  --ui-blue: var(--mg-text) !important;
+  --ui-purple: var(--mg-text-2) !important;
+  /* Tailwind's hue scales, as Hermes' utilities use them (status dots,
+     badges, notices): same lightness, no chroma, so every contrast Hermes
+     designed holds. Generated from the built app's stylesheet. Tailwind's
+     grays are tinted (gray and slate blue, stone warm), so they go too. */
+  --color-zinc-100: oklch(96.7% 0 0); --color-zinc-200: oklch(92% 0 0); --color-zinc-300: oklch(87.1% 0 0); --color-zinc-400: oklch(70.5% 0 0); --color-zinc-500: oklch(55.2% 0 0); --color-zinc-600: oklch(44.2% 0 0); --color-zinc-700: oklch(37% 0 0);
+  --color-amber-50: oklch(98.7% 0 0); --color-amber-100: oklch(96.2% 0 0); --color-amber-200: oklch(92.4% 0 0); --color-amber-300: oklch(87.9% 0 0); --color-amber-400: oklch(82.8% 0 0); --color-amber-500: oklch(76.9% 0 0); --color-amber-600: oklch(66.6% 0 0); --color-amber-700: oklch(55.5% 0 0); --color-amber-900: oklch(41.4% 0 0); --color-amber-950: oklch(27.9% 0 0);
+  --color-blue-300: oklch(80.9% 0 0); --color-blue-400: oklch(70.7% 0 0); --color-blue-600: oklch(54.6% 0 0); --color-blue-700: oklch(48.8% 0 0);
+  --color-cyan-300: oklch(86.5% 0 0); --color-cyan-700: oklch(52% 0 0);
+  --color-emerald-200: oklch(90.5% 0 0); --color-emerald-300: oklch(84.5% 0 0); --color-emerald-400: oklch(76.5% 0 0); --color-emerald-500: oklch(69.6% 0 0); --color-emerald-600: oklch(59.6% 0 0); --color-emerald-700: oklch(50.8% 0 0);
+  --color-fuchsia-300: oklch(83.3% 0 0); --color-fuchsia-700: oklch(51.8% 0 0);
+  --color-orange-500: oklch(70.5% 0 0);
+  --color-pink-300: oklch(82.3% 0 0); --color-pink-500: oklch(65.6% 0 0); --color-pink-600: oklch(59.2% 0 0); --color-pink-700: oklch(52.5% 0 0);
+  --color-red-200: oklch(88.5% 0 0); --color-red-300: oklch(80.8% 0 0); --color-red-400: oklch(70.4% 0 0); --color-red-500: oklch(63.7% 0 0); --color-red-600: oklch(57.7% 0 0); --color-red-700: oklch(50.5% 0 0); --color-red-950: oklch(25.8% 0 0);
+  --color-rose-300: oklch(81% 0 0); --color-rose-400: oklch(71.2% 0 0); --color-rose-600: oklch(58.6% 0 0);
+  --color-sky-300: oklch(82.8% 0 0); --color-sky-500: oklch(68.5% 0 0); --color-sky-600: oklch(58.8% 0 0); --color-sky-700: oklch(50% 0 0);
+  --color-teal-200: oklch(91% 0 0); --color-teal-600: oklch(60% 0 0);
+  --color-violet-400: oklch(70.2% 0 0); --color-violet-500: oklch(60.6% 0 0); --color-violet-600: oklch(54.1% 0 0);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  :root {
+    --mg-dur-1: 0ms;
+    --mg-dur-2: 0ms;
+    --mg-dur-3: 0ms;
+  }
+}

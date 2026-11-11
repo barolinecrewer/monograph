@@ -1,0 +1,12 @@
+{
+  "hermes": {
+    "commit": "2bd378ed1b",
+    "date": "2026-11-05"
+  },
+  "sources": {
+    "css": 15,
+    "js": 1
+  },
+  "hooks": 158,
+  "missing": []
+}

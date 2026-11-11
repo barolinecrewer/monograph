@@ -1,0 +1,119 @@
+/* Top-left corner: two rows.
+   Row 1 (the titlebar band): window buttons, sidebar toggle, mark, "Hermes".
+   Row 2 (top of the sidebar): search, then filter / new folder / new session.
+   Every control is Hermes' own, moved; nothing here is a new button. */
+
+/* ── Row 1 ── */
+/* The window buttons are native and do not zoom; the page does. The plugin
+   measures the zoom and publishes where their centre line and right edge fall
+   in page pixels, so the row lines up with them at any zoom. */
+[data-titlebar-cluster="left"] {
+  align-items: center !important; gap: 0 !important; height: 24px;
+  top: calc(var(--mg-lights-y, 17px) - 12px) !important; left: var(--mg-lights-x, 82px) !important;
+  translate: none !important;
+}
+[data-titlebar-cluster="left"] > button {
+  width: 24px !important; height: 24px !important; border-radius: var(--mg-r-tag) !important;
+  color: var(--mg-text-3) !important; background: transparent !important;
+  transition: background-color var(--mg-dur-1) var(--mg-ease-out), color var(--mg-dur-1) var(--mg-ease-out);
+}
+[data-titlebar-cluster="left"] > button:hover { background: var(--mg-active) !important; color: var(--mg-text) !important; }
+[data-titlebar-cluster="left"] > button .codicon { font-size: 15px !important; }
+/* Hermes counts unread sessions on the sidebar toggle with a small badge in
+   its accent blue. Chrome is grayscale: the count is white on the field. */
+[data-titlebar-cluster] [data-slot="badge"] { background-color: var(--mg-primary) !important; color: var(--mg-on-primary) !important; }
+[data-titlebar-cluster="left"]::before {
+  content: ""; order: 1; flex: none; width: 15px; height: 15px; margin-left: 10px;
+  background: var(--mg-logo-hermes) center / contain no-repeat;
+}
+[data-titlebar-cluster="left"]::after {
+  content: "Hermes"; order: 2; flex: none; margin-left: 7px; padding-right: 14px;
+  font-size: 13px; font-weight: 600; letter-spacing: -0.005em; line-height: 24px; color: var(--mg-text);
+}
+
+/* One line across the top. The window buttons cannot be moved from here, so
+   the band is built around them: its height is twice the distance to their
+   centre line, which puts the tabs, the "+" and the corner row on that line at
+   any zoom. (At 100% this is Hermes' own 34px.) */
+:root { --mg-header-h: calc(var(--mg-lights-y, 17px) * 2); }
+/* Only strips that share the band with the window controls. A zone with no
+   main pane in it (the sidebar), or one too narrow beside the controls, gets
+   its tabs on a row of their own under the band: Hermes draws that strip
+   `absolute` at the bottom of a taller header, and squeezing that header into
+   the band put the tabs under the corner row. The holder is a zone's header;
+   the :where() asks only those (every div was asked before; asked of a zone,
+   which holds the whole thread, the :has() restyled the page on every
+   streamed row) at the same specificity. A folded-away zone, which holds its
+   strip directly, is no longer matched: it is not drawn. */
+div:where([data-panel-header]):has(> [data-slot="context-menu-trigger"]:not(.absolute) > [role="tablist"]) {
+  height: var(--mg-header-h) !important; min-height: var(--mg-header-h) !important; box-sizing: border-box !important;
+}
+div:where([data-panel-header]):has(> [data-slot="context-menu-trigger"]:not(.absolute) > [role="tablist"]) > [data-slot="context-menu-trigger"],
+[data-slot="context-menu-trigger"]:not(.absolute) > [role="tablist"],
+[data-slot="context-menu-trigger"]:not(.absolute) > [role="tablist"] [data-slot="pane-tab"] { height: 100% !important; min-height: 0 !important; }
+[data-slot="context-menu-trigger"]:where([data-panel-header] > *):not(.absolute):has(> [role="tablist"]) { align-items: center !important; }
+/* The tabs' own row starts under the band, and never above the corner row's
+   bottom edge (at high zoom the band is shorter than the row plus a margin). */
+[data-panel-header]:has(> [data-slot="context-menu-trigger"].absolute > [role="tablist"]) {
+  height: calc(max(var(--mg-header-h), var(--mg-lights-y, 17px) + 14px) + 28px) !important;
+}
+
+/* ── Row 2 ── */
+/* Every :has() below sits behind a :where() that names where its element
+   is (inside the sidebar's search row, inside the session list's section).
+   The browser asks the cheap :where() first, so the :has() is asked only of
+   those few elements instead of every div or button in the page; asked of
+   every div, a :has() marks each one, and a row streamed into the chat then
+   restyled the whole page. :where() adds no specificity. */
+/* The "New session" row gives way to the icon in the corner. */
+[data-slot="sidebar-content"] > [data-slot="sidebar-group"]:has([data-tour="sidebar-nav-new-session"]) { display: none !important; }
+
+/* Search: a bare field, room on the right for the three icons */
+[data-slot="sidebar-content"] > div.shrink-0:where([data-slot="sidebar-content"] > *):has(> div > input) { padding: 6px 90px 6px 6px !important; }
+[data-slot="sidebar-content"] > div.shrink-0:where([data-slot="sidebar-content"] > *):has(> div > input) > div {
+  display: flex !important; width: 100% !important; height: 28px !important; gap: 7px !important; padding: 0 7px !important;
+  border: 0 !important; border-radius: var(--mg-r-button) !important; box-shadow: none !important;
+  background: transparent !important; color: var(--mg-text-3) !important;
+  transition: background-color var(--mg-dur-1) var(--mg-ease-out);
+}
+[data-slot="sidebar-content"] > div.shrink-0:where([data-slot="sidebar-content"] > *):has(> div > input) > div:is(:hover, :focus-within) { background: var(--mg-hover) !important; }
+[data-slot="sidebar-content"] > div.shrink-0:where([data-slot="sidebar-content"] > *):has(> div > input) svg { width: 14px !important; height: 14px !important; flex: none; color: var(--mg-text-3) !important; }
+[data-slot="sidebar-content"] > div.shrink-0:where([data-slot="sidebar-content"] > *):has(> div > input) input {
+  height: 28px !important; padding: 0 !important; font-size: var(--mg-fs-ui) !important; color: var(--mg-text) !important;
+  outline: 0 !important; box-shadow: none !important; text-overflow: ellipsis;
+}
+/* Hermes' placeholder ("Search sessions…") does not fit a narrow sidebar, so
+   the field shows its own one-word hint while empty. */
+[data-slot="sidebar-content"] > div.shrink-0:where([data-slot="sidebar-content"] > *):has(> div > input) input::placeholder { color: transparent !important; }
+[data-slot="sidebar-content"] > div.shrink-0:where([data-slot="sidebar-content"] > *):has(> div > input) > div { position: relative; }
+[data-slot="sidebar-content"] > div.shrink-0:where([data-slot="sidebar-content"] > *):has(> div > input) > div:where([data-slot="sidebar-content"] > div > *):has(> input:placeholder-shown)::after {
+  content: "Search"; position: absolute; left: 28px; top: 0; line-height: 28px;
+  font-size: var(--mg-fs-ui); color: var(--mg-text-3); pointer-events: none;
+}
+
+/* The session list's own actions move up beside the search. Their section
+   stops being a containing block so they resolve against the sidebar. */
+[data-slot="sidebar"] [data-slot="sidebar-group"]:has(> .group\/section .codicon-list-filter) { position: static !important; }
+[data-slot="sidebar"] .group\/section > div:where(.group\/section > *):has(.codicon-list-filter) {
+  position: absolute !important; z-index: 2; top: 6px; right: 14px;
+  display: flex !important; align-items: center; gap: 0 !important; height: 28px;
+  opacity: 1 !important; visibility: visible !important;
+}
+[data-slot="sidebar"] .group\/section > div:where(.group\/section > *):has(.codicon-list-filter) > button:where(.group\/section > div > *):has(> .codicon-check-all) { display: none !important; }
+[data-slot="sidebar"] .group\/section > div:where(.group\/section > *):has(.codicon-list-filter) > div:where(.group\/section > div > *):has(.codicon-list-filter) { order: 1; }
+[data-slot="sidebar"] .group\/section > div:where(.group\/section > *):has(.codicon-list-filter) > #mf-newfolder { order: 2; }
+[data-slot="sidebar"] .group\/section > div:where(.group\/section > *):has(.codicon-list-filter) > button:where(.group\/section > div > *):has(> .codicon-add) { order: 3; }
+[data-slot="sidebar"] .group\/section > div:where(.group\/section > *):has(.codicon-list-filter) :is(button, div:where(.group\/section *):has(> button)) {
+  width: 26px !important; height: 26px !important;
+}
+[data-slot="sidebar"] .group\/section > div:where(.group\/section > *):has(.codicon-list-filter) button {
+  display: grid !important; place-items: center; padding: 0 !important;
+  border-radius: var(--mg-r-tag) !important; background: transparent !important;
+  color: var(--mg-text-3) !important; opacity: 1 !important;
+  transition: background-color var(--mg-dur-1) var(--mg-ease-out), color var(--mg-dur-1) var(--mg-ease-out), transform var(--mg-dur-1) var(--mg-ease-out);
+}
+[data-slot="sidebar"] .group\/section > div:where(.group\/section > *):has(.codicon-list-filter) button:is(:hover, [aria-expanded="true"]) { background: var(--mg-active) !important; color: var(--mg-text) !important; }
+[data-slot="sidebar"] .group\/section > div:where(.group\/section > *):has(.codicon-list-filter) button:active { transform: scale(0.94); }
+[data-slot="sidebar"] .group\/section > div:where(.group\/section > *):has(.codicon-list-filter) button .codicon { font-size: 15px !important; }
+/* New session reads as "compose", as in the reference */
+[data-slot="sidebar"] .group\/section > div:where(.group\/section > *):has(.codicon-list-filter) > button > .codicon-add::before { content: "\ea73"; }

@@ -1,0 +1,216 @@
+/* Effort menu, drawn as a slider. The markup is Hermes' own menu (a radio
+   group of levels plus the Thinking / Fast switches), so picking a level is
+   still Hermes' write path; only the shape changes. The plugin adds drag.
+
+   The menu is found by its own classes: Hermes' reasoning pill is the only
+   dropdown-menu-content drawn with w-52 p-0 (model-edit-submenu's w-52 p-0
+   is a sub-content), open or playing its exit. This used to ask the whole
+   document whether the pill was open (a :has() on the root), again on every menu
+   that mounted anywhere. [data-slot] is doubled to keep that rule's
+   specificity, (0,5,0).
+
+   Layout: the checked level becomes the title, its ::before the fill and its
+   ::after the handle. Unchecked levels are the stops. --i is a level's index,
+   --n the number of levels. */
+[data-slot="dropdown-menu-content"][data-slot].w-52.p-0:has(> [data-slot="dropdown-menu-radio-group"]) {
+  --n: 7;
+  --track: 30px;
+  --head: 40px;
+  position: relative;
+  display: flex !important; flex-direction: column;
+  width: 264px !important; min-width: 0 !important;
+  padding: 12px !important;
+  border-radius: var(--mg-r-card) !important;
+  overflow: visible !important;
+
+  > [data-slot="dropdown-menu-label"],
+  > [data-slot="dropdown-menu-separator"] { display: none !important; }
+
+  /* ── Levels ── */
+  > [data-slot="dropdown-menu-radio-group"] {
+    position: relative; order: 0;
+    display: grid; grid-template-columns: repeat(var(--n), 1fr);
+    height: calc(var(--head) + var(--track)); padding-top: var(--head);
+    cursor: pointer; touch-action: none;
+  }
+  > [data-slot="dropdown-menu-radio-group"]:has(> :nth-child(4):last-child) { --n: 4; }
+  > [data-slot="dropdown-menu-radio-group"]:has(> :nth-child(5):last-child) { --n: 5; }
+  > [data-slot="dropdown-menu-radio-group"]:has(> :nth-child(6):last-child) { --n: 6; }
+  > [data-slot="dropdown-menu-radio-group"]:has(> :nth-child(8):last-child) { --n: 8; }
+  > [data-slot="dropdown-menu-radio-group"] > [role="menuitemradio"]:nth-child(1) { --i: 0; }
+  > [data-slot="dropdown-menu-radio-group"] > [role="menuitemradio"]:nth-child(2) { --i: 1; }
+  > [data-slot="dropdown-menu-radio-group"] > [role="menuitemradio"]:nth-child(3) { --i: 2; }
+  > [data-slot="dropdown-menu-radio-group"] > [role="menuitemradio"]:nth-child(4) { --i: 3; }
+  > [data-slot="dropdown-menu-radio-group"] > [role="menuitemradio"]:nth-child(5) { --i: 4; }
+  > [data-slot="dropdown-menu-radio-group"] > [role="menuitemradio"]:nth-child(6) { --i: 5; }
+  > [data-slot="dropdown-menu-radio-group"] > [role="menuitemradio"]:nth-child(7) { --i: 6; }
+  > [data-slot="dropdown-menu-radio-group"] > [role="menuitemradio"]:nth-child(8) { --i: 7; }
+
+  /* Track */
+  > [data-slot="dropdown-menu-radio-group"]::before {
+    content: ""; position: absolute; inset: var(--head) 0 0 0;
+    border-radius: 9999px; background: var(--mg-canvas);
+    box-shadow: inset 0 0 0 1px var(--mg-hairline);
+  }
+  /* Thinking off: no level is checked */
+  > [data-slot="dropdown-menu-radio-group"]:not(:has(> [aria-checked="true"]))::after {
+    content: "Off"; position: absolute; inset: 0 0 auto 0; height: 28px;
+    font-size: 15px; font-weight: 500; line-height: 28px; text-align: center; color: var(--mg-text-3);
+  }
+
+  /* A stop: the whole cell is the target, the dot is what you see */
+  > [data-slot="dropdown-menu-radio-group"] > [role="menuitemradio"] {
+    position: relative; z-index: 1;
+    grid-row: 1; grid-column: calc(var(--i) + 1);
+    display: grid !important; place-items: center;
+    height: var(--track); min-height: 0 !important; padding: 0 !important;
+    border-radius: 9999px !important;
+    background: transparent !important;
+    font-size: 0 !important; color: transparent !important;
+    cursor: pointer; outline: 0 !important;
+  }
+  > [data-slot="dropdown-menu-radio-group"] > [role="menuitemradio"]::after {
+    content: ""; position: absolute; top: calc(50% - 2px); left: calc(50% - 2px);
+    width: 4px; height: 4px; border-radius: 50%;
+    background: var(--mg-text-4);
+    transition: transform var(--mg-dur-1) var(--mg-ease-out), background-color var(--mg-dur-1) var(--mg-ease-out);
+  }
+  > [data-slot="dropdown-menu-radio-group"] > [role="menuitemradio"]:is(:hover, [data-highlighted])::after { transform: scale(1.75); background: var(--mg-text-2); }
+  /* Stops the fill already covers stay quiet until pointed at */
+  > [data-slot="dropdown-menu-radio-group"] > [role="menuitemradio"]:has(~ [aria-checked="true"])::after { background: transparent; }
+  > [data-slot="dropdown-menu-radio-group"] > [role="menuitemradio"]:has(~ [aria-checked="true"]):is(:hover, [data-highlighted])::after { background: var(--mg-text-2); }
+
+  /* The checked level: title on top, fill and handle below */
+  > [data-slot="dropdown-menu-radio-group"] > [role="menuitemradio"][aria-checked="true"] {
+    position: absolute; z-index: 0; inset: 0;
+    grid-area: auto; /* else the grid cell, not the group, is its containing block */
+    display: block !important;
+    height: auto; padding: 0 34px !important;
+    border-radius: 0 !important;
+    font-size: 15px !important; font-weight: 500; line-height: 28px; text-align: center;
+    white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+    color: var(--mg-text) !important;
+    pointer-events: none;
+  }
+  > [data-slot="dropdown-menu-radio-group"] > [role="menuitemradio"][aria-checked="true"] > :is(span, svg, i, div) { display: none !important; }
+  > [data-slot="dropdown-menu-radio-group"] > [role="menuitemradio"][aria-checked="true"]::before {
+    content: ""; position: absolute; left: 0; top: var(--head);
+    width: calc((var(--i) + 0.5) * 100% / var(--n) + var(--track) / 2); height: var(--track);
+    border-radius: 9999px; background: var(--mg-fill, #47474a);
+    animation: mg-effort-fill var(--mg-dur-2) var(--mg-ease-out);
+  }
+  > [data-slot="dropdown-menu-radio-group"] > [role="menuitemradio"][aria-checked="true"]::after {
+    position: absolute; top: calc(var(--head) + 3px);
+    left: calc((var(--i) + 0.5) * 100% / var(--n) - (var(--track) - 6px) / 2);
+    width: calc(var(--track) - 6px); height: calc(var(--track) - 6px);
+    background: var(--mg-primary);
+    transform: none;
+    animation: mg-effort-handle var(--mg-dur-2) var(--mg-ease-spring);
+  }
+
+  /* ── Switches: Thinking top right, speed top left. The row is the button;
+        its switch stretches over it and stays the thing you actually click. ── */
+  > [data-slot="dropdown-menu-item"]:has([data-slot="switch"]) {
+    position: absolute; z-index: 2; top: 12px;
+    display: grid !important; place-items: center;
+    width: 28px; height: 28px; min-height: 0 !important; padding: 0 !important;
+    border-radius: var(--mg-r-button) !important;
+    background: transparent !important;
+    font-size: 0 !important; color: var(--mg-text-4) !important;
+    transition: background-color var(--mg-dur-1) var(--mg-ease-out), color var(--mg-dur-1) var(--mg-ease-out);
+  }
+  > [data-slot="dropdown-menu-item"]:has([data-slot="switch"])::before {
+    content: "\ea61"; position: absolute; top: calc(50% - 7.5px); left: calc(50% - 7.5px);
+    width: 15px; height: 15px;
+    font: normal 15px/1 codicon; -webkit-font-smoothing: antialiased;
+  }
+  > [data-slot="dropdown-menu-item"]:has([data-slot="switch"]):is(:hover, [data-highlighted]) { background: var(--mg-active) !important; color: var(--mg-text-2) !important; }
+  > [data-slot="dropdown-menu-item"]:has([data-slot="switch"][aria-checked="true"]) { background: var(--mg-active) !important; color: var(--mg-text) !important; }
+  > [data-slot="dropdown-menu-item"] [data-slot="switch"] {
+    position: absolute !important; inset: 0 !important; width: auto !important; height: auto !important;
+    margin: 0 !important; opacity: 0 !important; cursor: pointer;
+  }
+  /* Thinking has no label of its own; the speed switches do */
+  > [data-slot="dropdown-menu-item"]:has([data-slot="switch"]:not([aria-label])) { right: 12px; }
+  > [data-slot="dropdown-menu-item"]:has([data-slot="switch"][aria-label]) { left: 12px; }
+  > [data-slot="dropdown-menu-item"]:has([data-slot="switch"][aria-label]) ~ [data-slot="dropdown-menu-item"]:has([data-slot="switch"][aria-label]) { left: 44px; }
+  > [data-slot="dropdown-menu-item"]:has([data-slot="switch"][aria-label]) ~ [data-slot="dropdown-menu-item"]:has([data-slot="switch"][aria-label]) ~ [data-slot="dropdown-menu-item"]:has([data-slot="switch"][aria-label]) { left: 76px; }
+  > [data-slot="dropdown-menu-item"]:has([data-slot="switch"][aria-label])::before { content: "\ea86"; }
+  > [data-slot="dropdown-menu-item"]:has([data-slot="switch"][aria-label*="ultra" i])::before { content: "\eb44"; }
+  > [data-slot="dropdown-menu-item"]:has([data-slot="switch"][aria-label*="daybreak" i])::before { content: "\ec10"; }
+
+  /* Anything else Hermes puts here (e.g. "Use standard speed") is a plain row under the slider */
+  > [data-slot="dropdown-menu-item"]:not(:has([data-slot="switch"])) { order: 1; margin-top: 8px; }
+}
+
+@keyframes mg-effort-handle { from { transform: scale(0.82); } to { transform: none; } }
+@keyframes mg-effort-fill { from { opacity: 0.6; } to { opacity: 1; } }
+
+/* ── Power: hyperspace ──
+   --p runs from 1/n to 1 with the level. The fill wears the colour of the
+   model in use (--mg-model, set from the logo index) and stars cross it
+   toward the tail: dots drifting at the bottom of the range, long streaks at
+   speed at the top. The handle's halo grows with it.
+   Cost: five small gradient tiles sliding inside one 30px strip, only while
+   the menu is open. No canvas, no script, no extra element. */
+[data-slot="dropdown-menu-content"][data-slot].w-52.p-0:has(> [data-slot="dropdown-menu-radio-group"]) {
+  > [data-slot="dropdown-menu-radio-group"] > [role="menuitemradio"][aria-checked="true"] {
+    --p: calc((var(--i) + 1) / var(--n));
+    --pp: calc(var(--p) * var(--p));
+    --c: var(--mg-model, #9a9a9e);
+    --streak: calc(1.1px + var(--pp) * var(--p) * 28px);   /* half-length of a star */
+    --star: rgba(255, 255, 255, calc(0.7 + var(--p) * 0.3));
+    overflow: visible; /* the halo reaches past the group */
+    --star-dim: rgba(255, 255, 255, calc(0.4 + var(--p) * 0.3));
+  }
+  > [data-slot="dropdown-menu-radio-group"] > [role="menuitemradio"][aria-checked="true"]::before {
+    overflow: hidden;
+    background:
+      radial-gradient(ellipse var(--streak) 1.1px at 14px 7px, var(--star) 35%, transparent) 0 0 / 48px 100%,
+      radial-gradient(ellipse calc(var(--streak) * 0.7) 0.9px at 50px 21px, var(--star-dim) 35%, transparent) 0 0 / 80px 100%,
+      radial-gradient(ellipse calc(var(--streak) * 1.4) 1.4px at 31px 14px, var(--star) 35%, transparent) 0 0 / 120px 100%,
+      radial-gradient(ellipse calc(var(--streak) * 0.6) 0.9px at 22px 25px, var(--star-dim) 35%, transparent) 0 0 / 60px 100%,
+      radial-gradient(ellipse calc(var(--streak) * 0.5) 0.8px at 9px 3px, var(--star-dim) 35%, transparent) 0 0 / 40px 100%,
+      linear-gradient(90deg,
+        color-mix(in srgb, var(--c) calc(30% + var(--p) * 25%), #1c1c1e),
+        color-mix(in srgb, var(--c) calc(60% + var(--p) * 40%), #2a2a2c) 78%,
+        color-mix(in srgb, var(--c) calc(50% + var(--p) * 35%), #232325));
+    box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.06), inset 0 -6px 10px -6px rgba(0, 0, 0, 0.35);
+    animation:
+      mg-effort-fill var(--mg-dur-2) var(--mg-ease-out),
+      mg-hyperspace calc(5.2s - var(--p) * 4.5s) linear infinite;
+  }
+  > [data-slot="dropdown-menu-radio-group"] > [role="menuitemradio"][aria-checked="true"]::after {
+    box-shadow:
+      0 0 0 calc(var(--pp) * 4px) color-mix(in srgb, var(--c) calc(var(--pp) * 38%), transparent),
+      0 0 calc(4px + var(--pp) * 20px) color-mix(in srgb, var(--c) calc(var(--pp) * 90%), transparent);
+    animation:
+      mg-effort-handle var(--mg-dur-2) var(--mg-ease-spring),
+      mg-power-pulse calc(2.4s - var(--p) * 1.7s) ease-in-out infinite;
+  }
+  /* The title picks up weight at the top of the range */
+  > [data-slot="dropdown-menu-radio-group"] > [role="menuitemradio"][aria-checked="true"] { text-shadow: 0 0 calc(var(--pp) * 14px) color-mix(in srgb, var(--c) calc(var(--pp) * 70%), transparent); }
+
+  /* Fast, top left. Hermes only offers the switch on models that have a fast
+     path; where it does not, the button is drawn but inert, so the corner
+     never changes shape between models. */
+  &:not(:has(> [data-slot="dropdown-menu-item"] [data-slot="switch"][aria-label]))::before {
+    content: "\ea86"; position: absolute; z-index: 2; top: 12px; left: 12px;
+    display: grid; place-items: center; width: 28px; height: 28px;
+    font: normal 15px/1 codicon; -webkit-font-smoothing: antialiased;
+    color: var(--mg-text-4); opacity: 0.45; cursor: not-allowed;
+  }
+  /* Fast on: the bolt is lit and the current runs at full speed */
+  > [data-slot="dropdown-menu-item"]:has([data-slot="switch"][aria-label][aria-checked="true"])::before { text-shadow: 0 0 10px rgba(255, 255, 255, 0.7); }
+  &:has(> [data-slot="dropdown-menu-item"] [data-slot="switch"][aria-label][aria-checked="true"]) > [data-slot="dropdown-menu-radio-group"] > [aria-checked="true"]::before { animation-duration: var(--mg-dur-2), 0.45s; }
+}
+/* Every layer travels a whole number of its own tiles, so the loop has no
+   seam; near layers go twice as far as far ones. */
+@keyframes mg-hyperspace {
+  from { background-position: 0 0, 0 0, 0 0, 0 0, 0 0, 0 0; }
+  to { background-position: -480px 0, -240px 0, -480px 0, -240px 0, -240px 0, 0 0; }
+}
+@keyframes mg-power-pulse { 0%, 100% { scale: 1; } 50% { scale: calc(1 + var(--pp, 0) * 0.07); } }
+/* Reduced motion and motion off leave the stars still: see the kill switch
+   in 05-motion.css. */
+

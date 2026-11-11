@@ -1,0 +1,151 @@
+/* Sidebar: quiet rows on the field, state carried by fill and text step. */
+
+/* Every :has() on a common element (div, li) sits behind a :where() that
+   puts it inside the sidebar: the browser asks that first, so the :has() is
+   asked of sidebar elements only, not of every div or list item in the chat
+   (asked of those, a streamed row restyled the page). No specificity added. */
+
+/* Rows */
+[data-slot="sidebar"] :is(button, [role="button"], li > div, a) {
+  border-radius: var(--mg-r-button) !important; border-color: transparent !important; outline-color: transparent !important;
+  box-shadow: none !important;
+  transition: background-color var(--mg-dur-1) var(--mg-ease-out), color var(--mg-dur-1) var(--mg-ease-out), opacity var(--mg-dur-2) var(--mg-ease-out);
+}
+[data-slot="sidebar"] .row-hover { border-radius: var(--mg-r-button) !important; transition: background-color var(--mg-dur-1) var(--mg-ease-out); }
+[data-slot="sidebar"] [data-slot="sidebar-group-content"] { font-size: var(--mg-fs-ui) !important; }
+[data-slot="sidebar"] div:where([data-slot="sidebar"] *):has(> input[type="text"], > input:not([type])) {
+  border-radius: var(--mg-r-button) !important; border-color: transparent !important; background: var(--mg-raised) !important;
+}
+[data-slot="sidebar"] input { background: transparent !important; }
+/* Hide the running-chat arc ring on sidebar rows */
+.arc-row { display: none !important; }
+/* ── Sections: Pinned, then the history ──
+   Both are Hermes' own. Hermes' nav group (New session, Capabilities,
+   Messaging, and in Advanced mode Artifacts and Scheduled jobs, plus any row
+   a plugin adds) is not shown: "New session" is in the corner (12-corner.css)
+   and the pages open from the surfaces menu, top right, and their shortcuts. */
+[data-slot="sidebar"] [data-slot="sidebar-content"] > [data-slot="sidebar-group"]:has([data-tour^="sidebar-nav-"]) { display: none !important; }
+/* Pinned: Hermes' own section, above the history. Shown
+   only when something is pinned, as in the reference; pin from a row's menu,
+   with shift-click, or from home. */
+[data-slot="sidebar"] [data-session-pin-drop] { margin-bottom: 10px; }
+[data-slot="sidebar"] [data-session-pin-drop]:not(:has([data-slot="context-menu-trigger"])) { display: none !important; }
+/* Section labels: no dither square, sentence case, third text step */
+[data-slot="sidebar"] .dither { display: none !important; }
+[data-slot="sidebar"] .uppercase { text-transform: none !important; letter-spacing: 0 !important; font-size: var(--mg-fs-meta) !important; font-weight: 500 !important; padding-left: 10px !important; color: var(--mg-text-3) !important; }
+/* Sidebar meta line -> last-reply preview (text supplied by session-model-icons plugin) */
+[data-slot="sidebar"] span[data-preview] { font-size: 0 !important; }
+[data-slot="sidebar"] span[data-preview]::after {
+  content: attr(data-preview); display: block; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
+  font-size: 0.6875rem; color: var(--mg-text-3);
+}
+/* Sidebar: no status dot / grab lead on session rows */
+[data-slot="sidebar"] .row-hover span.grid.shrink-0[class*="size-3.5"] { display: none !important; }
+/* The model's mark at the head of a session row (src/modules/25-session-marks.js) */
+[data-slot="sidebar"] .mg-row-model { flex: none; align-self: center; width: 13px; height: 13px; margin-right: 6px; }
+/* Working session: soft shimmer sweep across the title + breathing model mark.
+   At its dimmest the title is the third text step (4.5:1 and up); the sweep
+   lifts it to the first. With motion off the sweep stands still and the ring
+   in place of the time (below) still says the row is working. */
+[data-slot="sidebar"] :is(.row-hover[data-working="true"], .mf-srow[data-working="true"]) :is(.hover-marquee-inner, .mf-stitle) {
+  background: linear-gradient(90deg, var(--mg-text-3) 0%, var(--mg-text) 45%, var(--mg-text-3) 90%);
+  background-size: 220% 100%;
+  -webkit-background-clip: text; background-clip: text; color: transparent !important;
+  animation: mf-shimmer 1.8s linear infinite;
+}
+/* Working session: spinner ring replaces the timestamp (folder rows get one at the right edge) */
+[data-slot="sidebar"] .row-hover[data-working="true"] time { font-size: 0 !important; display: inline-flex; vertical-align: middle; }
+[data-slot="sidebar"] .row-hover[data-working="true"] time::after,
+[data-slot="sidebar"] .mf-srow[data-working="true"]::after {
+  content: ""; display: inline-block; width: 9px; height: 9px; flex-shrink: 0;
+  border-radius: 50%; border: 1.5px solid var(--mg-hairline-bold); border-top-color: var(--mg-primary);
+  animation: mf-spin .8s linear infinite;
+}
+[data-slot="sidebar"] .mf-srow[data-working="true"]::after { margin-left: auto; }
+/* Finished while away (unread): solid white dot replaces the timestamp, title at full brightness */
+[data-slot="sidebar"] .row-hover:not([data-working="true"]):has([aria-label="Finished — unread"]) time { font-size: 0 !important; display: inline-flex; vertical-align: middle; }
+[data-slot="sidebar"] .row-hover:not([data-working="true"]):has([aria-label="Finished — unread"]) time::after {
+  content: ""; display: inline-block; width: 7px; height: 7px; border-radius: 50%; background: var(--mg-primary);
+  animation: mf-pop .4s var(--mg-ease-spring) both;
+}
+/* Needs your input: hollow white ring that breathes */
+[data-slot="sidebar"] .row-hover:has([aria-label="Needs your input"]) time { font-size: 0 !important; display: inline-flex; vertical-align: middle; }
+[data-slot="sidebar"] .row-hover:has([aria-label="Needs your input"]) time::after {
+  content: ""; display: inline-block; width: 8px; height: 8px; border-radius: 50%; border: 1.5px solid var(--mg-primary);
+  animation: monograph-pulse 1.4s ease-in-out infinite;
+}
+/* Title strength, three steps, by text colour (never opacity, which would
+   take the row under its contrast minimum on the selected fill):
+   the selected row reads strongest (the fill, full text, medium weight),
+   an unread one next (full text, medium weight, the dot), the rest quiet
+   (third step; second on hover). A selected row that is also unread keeps
+   both: fill and dot. A working row's title is the shimmer above. */
+[data-slot="sidebar"] .row-hover .hover-marquee-inner { color: var(--mg-text-3); transition: color var(--mg-dur-1) var(--mg-ease-out); }
+[data-slot="sidebar"] .row-hover:hover .hover-marquee-inner { color: var(--mg-text-2); }
+[data-slot="sidebar"] .row-hover:has([aria-label="Finished — unread"]) .hover-marquee-inner { color: var(--mg-text); font-weight: 500; }
+[data-slot="sidebar"] .row-hover[class~="bg-(--ui-row-active-background)"] .hover-marquee-inner { color: var(--mg-text); font-weight: 500; }
+/* New session: plain "+" instead of the robot, no shortcut */
+[data-slot="sidebar"] li:where([data-slot="sidebar"] *):has([data-tour="sidebar-nav-new-session"]) :is(.codicon, svg) { display: none !important; }
+[data-slot="sidebar"] li:where([data-slot="sidebar"] *):has([data-tour="sidebar-nav-new-session"]) [data-slot="kbd-group"],
+[data-slot="sidebar"] li:where([data-slot="sidebar"] *):has([data-tour="sidebar-nav-new-session"]) [data-slot="kbd"] { display: none !important; }
+[data-slot="sidebar"] li:where([data-slot="sidebar"] *):has([data-tour="sidebar-nav-new-session"]) button::before {
+  content: ""; width: 14px; height: 14px; flex-shrink: 0;
+  background:
+    linear-gradient(currentColor, currentColor) center / 11px 1.75px no-repeat,
+    linear-gradient(currentColor, currentColor) center / 1.75px 11px no-repeat;
+}
+/* Folders */
+#mf-folders { padding: 4px 0 6px; }
+
+#mf-folders .mf-label { font-size: var(--mg-fs-meta); font-weight: 500; color: var(--mg-text-3); }
+#mf-folders .mf-add { width: 20px; height: 20px; border-radius: var(--mg-r-tag); color: var(--mg-text-3); font-size: 15px; line-height: 1; background: transparent; }
+#mf-folders .mf-add:hover { background: var(--mg-active); color: var(--mg-text); }
+#mf-folders .mf-fhead { display: flex; align-items: center; gap: 7px; padding: 5px 8px; border-radius: var(--mg-r-button); color: var(--mg-text-2); font-size: var(--mg-fs-ui); cursor: default; }
+#mf-folders .mf-fhead:hover { background: var(--mg-hover); }
+#mf-folders .mf-chev { opacity: .5; transition: transform var(--mg-dur-2) var(--mg-ease-out); fill: none !important; stroke: currentColor; stroke-width: 2.4; }
+#mf-folders .mf-chev.open { transform: rotate(90deg); }
+#mf-folders .mf-name { flex: 1; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; outline: none; }
+#mf-folders .mf-count { font-size: 0.6875rem; color: var(--mg-text-3); }
+#mf-folders .mf-del { opacity: 0; width: 18px; height: 18px; border-radius: 5px; color: var(--mg-text-3); background: transparent; }
+#mf-folders .mf-fhead:hover .mf-del { opacity: 1; }
+#mf-folders .mf-del:hover { color: var(--mg-text); background: var(--mg-active); }
+#mf-folders .mf-srow { display: flex; align-items: center; gap: 7px; margin-left: 18px; padding: 5px 8px; border-radius: var(--mg-r-button); font-size: var(--mg-fs-ui); color: var(--mg-text-2); cursor: default; }
+#mf-folders .mf-srow:hover { background: var(--mg-hover); color: var(--mg-text); }
+#mf-folders .mf-stitle { min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+#mf-folders .mf-empty { margin-left: 26px; padding: 3px 0 6px; font-size: 0.6875rem; color: var(--mg-text-3); }
+.mf-rowbtn { display: grid; place-items: center; width: 20px; height: 20px; border-radius: var(--mg-r-tag); color: var(--mg-text-3); opacity: 0; background: transparent; }
+.row-hover:hover .mf-rowbtn, .mf-rowbtn[data-state="open"] { opacity: 1; }
+.mf-rowbtn:hover { color: var(--mg-text); background: var(--mg-active); }
+/* Profile footer: a hairline, the profile row, two square tool buttons */
+#mf-footer { flex-shrink: 0; margin: auto 0 0; display: flex; align-items: center; gap: 6px; padding: 10px 12px 12px; border-top: 1px solid var(--mg-hairline); }
+#mf-footer .mf-me { flex: 1; min-width: 0; display: flex; align-items: center; gap: 9px; padding: 5px 6px; border-radius: var(--mg-r-button) !important; background: transparent; color: var(--mg-text-2); font-size: var(--mg-fs-ui); font-weight: 500; text-align: left; transition: background-color var(--mg-dur-1) var(--mg-ease-out), color var(--mg-dur-1) var(--mg-ease-out); }
+#mf-footer .mf-me:hover { background: var(--mg-hover); color: var(--mg-text); }
+#mf-footer .mf-me img { width: 26px; height: 26px; border-radius: 9999px; object-fit: cover; flex-shrink: 0; box-shadow: 0 0 0 1px var(--mg-hairline-strong); }
+#mf-footer .mf-conn { width: 32px; height: 32px; border-radius: var(--mg-r-button) !important; display: grid; place-items: center; color: var(--mg-text-2); background: var(--mg-raised); flex-shrink: 0; transition: background-color var(--mg-dur-1) var(--mg-ease-out), color var(--mg-dur-1) var(--mg-ease-out), transform var(--mg-dur-1) var(--mg-ease-out); }
+#mf-footer .mf-conn:hover { background: var(--mg-raised-2); color: var(--mg-text); }
+#mf-footer .mf-conn:active { transform: scale(.94); }
+/* Folder context menu: same recipe as every floating surface */
+#mf-menu { position: fixed; z-index: 9999; min-width: 160px; padding: 5px; border-radius: var(--mg-r-card);
+  background: var(--mg-raised); border: 1px solid var(--mg-hairline-strong); font-size: var(--mg-fs-ui); color: var(--mg-text-2); }
+.mf-item { padding: 6px 10px; border-radius: var(--mg-r-tag); cursor: default; white-space: nowrap; font-size: var(--mg-fs-ui); color: var(--mg-text-2); }
+.mf-item:hover { background: var(--mg-active); color: var(--mg-text); }
+[data-slot="context-menu-content"] .mf-inj.mf-item { padding: 6px 10px 6px 31px; font-size: inherit; color: inherit; }
+[data-slot="context-menu-content"] .mf-inj.mf-sep { margin: 4px -4px; }
+.mf-sep { height: 1px; margin: 4px 6px; background: var(--mg-hairline); }
+/* ── Sidebar grid: icon column centre ≈25px, text column 44px, right edge = row edge ── */
+[data-tree-tab]:first-child { margin-left: 12px !important; }
+[data-slot="sidebar"] li:where([data-slot="sidebar"] *):has([data-tour="sidebar-nav-new-session"]) button { gap: 12px !important; font-weight: 500 !important; }
+[data-slot="sidebar"] .group\/workspace.select-none { padding-left: 0 !important; }
+[data-slot="sidebar"] .group\/workspace.select-none span.h-px { display: none !important; }
+#mf-folders .mf-chev { display: none !important; }
+#mf-folders .mf-fhead { gap: 13px !important; padding-right: 6px !important; }
+#mf-folders .mf-srow { margin-left: 20px !important; gap: 13px !important; }
+#mf-footer { padding: 10px 17px 12px 12px !important; }
+#mf-footer .mf-me { padding: 5px 6px 5px 2.5px !important; gap: 8px !important; }
+#mf-footer .mf-me img { width: 22px !important; height: 22px !important; }
+#mf-footer .mf-conn { width: 28px !important; height: 28px !important; }
+[data-slot="profile-rail"] { display: none !important; }
+/* Gateway section (messaging platforms) above the footer */
+[data-mf-gw-host] { padding-bottom: 64px !important; }
+#mf-gateway { font-size: var(--mg-fs-meta); font-weight: 500; color: var(--mg-text-3); padding: 14px 0 6px; }
+[data-mf-gw] { margin-bottom: 0 !important; padding-left: 9px !important; }

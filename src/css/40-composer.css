@@ -1,0 +1,218 @@
+/* Composer: a well with two layers. You type on top; the controls sit on a
+   quiet row underneath. The send button is the only white thing in it, and
+   the box does not light up on focus: the caret already says where you are. */
+[data-slot="composer-root"] { border-radius: var(--mg-r-composer) !important; border: 0 !important; box-shadow: none !important; outline: 0 !important; }
+[data-slot="composer-surface"] {
+  --composer-fill: var(--mg-well);
+  --composer-control-size: 28px;
+  --composer-control-primary-size: 28px;
+  overflow: visible !important;
+  border: 1px solid var(--mg-hairline) !important;
+  border-radius: var(--mg-r-composer) !important;
+  outline: 0 !important;
+  background: var(--mg-well) !important;
+  box-shadow: none !important;
+  backdrop-filter: none !important;
+  -webkit-backdrop-filter: none !important;
+  transition: border-color var(--mg-dur-2) var(--mg-ease-out);
+}
+/* Hermes paints the border in --dt-composer-ring (near white) while the
+   editor has focus. Pin both the variable and the rule. */
+[data-slot="composer-surface"] { --dt-composer-ring: var(--mg-hairline); }
+[data-slot="composer-surface"]:focus-within,
+[data-slot="composer-surface"]:has([data-slot="composer-rich-input"]:focus-visible) { border-color: var(--mg-hairline) !important; }
+[data-slot="composer-surface"] > [aria-hidden]:first-child { background: transparent !important; border: 0 !important; box-shadow: none !important; }
+/* The controls sit 8px from the right, left and bottom edges alike */
+[data-slot="composer-fade"] { overflow: visible !important; padding: 6px 8px 8px !important; }
+
+/* The box is exactly the message column: its left edge is where replies start,
+   its right edge is where your own messages end. (48px column padding, less
+   the 10px grab margin Hermes keeps around the composer.) */
+[data-slot="composer-dock"]:not([data-popped-out]) {
+  width: calc(min(var(--composer-width), 100%) - 38px - var(--message-text-indent, 0px)) !important;
+  margin-left: calc(var(--message-text-indent, 0px) / 2);
+  padding-bottom: 16px !important;
+}
+/* Same gutter on both sides keeps the column and the composer on one axis */
+[data-slot="aui_thread-viewport"] { scrollbar-gutter: stable both-edges; }
+
+/* The thread scrolls behind the composer, never under its bottom edge */
+[data-slot="composer-dock"]:not([data-popped-out])::after {
+  content: ""; position: absolute; z-index: -1; inset: 50% -1.5rem 0;
+  background: var(--mg-surface); pointer-events: none;
+}
+
+/* Two layers: input on top, menu and controls below */
+[data-slot="composer-fade"] > div:is([class*="menu_input_controls"], [class*="input_input"]) {
+  grid-template-columns: auto minmax(0, 1fr) !important;
+  grid-template-areas: "input input" "menu controls" !important;
+  align-items: center !important;
+  gap: 6px 4px !important;
+}
+[data-slot="composer-rich-input"] { padding: 2px 8px 2px 6px !important; }
+[data-slot="composer-rich-input"]:is(:empty, [data-empty])::before { color: var(--mg-text-3) !important; }
+
+/* Controls */
+[data-slot="composer-surface"] button { border-radius: 9999px !important; }
+[data-slot="composer-fade"] .\[grid-area\:menu\] {
+  transform: none !important; translate: none !important;
+  align-self: center !important; align-items: center !important;
+  margin-left: -2px;
+}
+/* "Add context" is a paperclip, not a plus: it attaches things. Drawn here
+   as a mask (Lucide's paperclip, ISC) so it takes the text colour. */
+[data-slot="composer-fade"] .\[grid-area\:menu\] > button:first-of-type {
+  position: relative !important; display: block !important; padding: 0 !important;
+  width: 28px !important; height: 28px !important; min-width: 28px !important;
+  border: 0 !important;
+  background: transparent !important;
+  box-shadow: none !important;
+  color: var(--mg-text-2) !important;
+  transition: background-color var(--mg-dur-1) var(--mg-ease-out), color var(--mg-dur-1) var(--mg-ease-out), transform var(--mg-dur-1) var(--mg-ease-out);
+}
+/* Hermes' plus (codicon-add, the menu trigger's one child) gives way.
+   Named without :first-of-type: a structural pseudo-class (:first-child,
+   :first-of-type, :nth-child…) anywhere left of a selector's last compound
+   makes Blink restyle the whole subtree of every sibling each time a parent
+   gains a child, page-wide, so `> button:first-of-type > *` restyled every
+   block of a streaming reply each time a block was appended (w6-cost).
+   Keep structural pseudo-classes in the last compound only. */
+[data-slot="composer-fade"] .\[grid-area\:menu\] > button[aria-haspopup="menu"] > .codicon-add { opacity: 0 !important; }
+[data-slot="composer-fade"] .\[grid-area\:menu\] > button:first-of-type::before {
+  content: ""; position: absolute; left: calc(50% - 7.5px); top: calc(50% - 7.5px);
+  width: 15px; height: 15px;
+  background: currentColor;
+  -webkit-mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='1.6' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='m21.44 11.05-9.19 9.19a6 6 0 0 1-8.49-8.49l8.57-8.57A4 4 0 1 1 18 8.84l-8.59 8.57a2 2 0 0 1-2.83-2.83l8.49-8.48'/%3E%3C/svg%3E") center / contain no-repeat;
+  mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='1.6' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='m21.44 11.05-9.19 9.19a6 6 0 0 1-8.49-8.49l8.57-8.57A4 4 0 1 1 18 8.84l-8.59 8.57a2 2 0 0 1-2.83-2.83l8.49-8.48'/%3E%3C/svg%3E") center / contain no-repeat;
+  transition: rotate var(--mg-dur-2) var(--mg-ease-out);
+}
+[data-slot="composer-fade"] .\[grid-area\:menu\] > button:first-of-type:is(:hover, [aria-expanded="true"])::before { rotate: -12deg; }
+[data-slot="composer-fade"] .\[grid-area\:menu\] > button:first-of-type[aria-expanded="true"] { background: var(--mg-active) !important; color: var(--mg-text) !important; }
+[data-slot="composer-fade"] .\[grid-area\:menu\] > button:first-of-type:hover { background: var(--mg-active) !important; color: var(--mg-text) !important; }
+[data-slot="composer-fade"] .\[grid-area\:menu\] > button:first-of-type:active { background: var(--mg-press) !important; }
+
+/* Model selector: logo and name, nothing else. The logo is picked by the
+   generated rules in src/logos (matched on the pill's provider: model label).
+   Hermes puts data-tour="model-pill" on the main chat's pill only; a session
+   opened as a tile has none, so the pill is also matched by its label, which
+   starts with "Model · " in English. In other languages a tile's pill stays
+   unstyled. */
+[data-slot="composer-fade"] button:is([data-tour="model-pill"], [aria-label^="Model · "]) {
+  gap: 6px !important;
+  padding: 0 8px 0 7px !important;
+  color: var(--mg-text-2) !important;
+  border-radius: var(--mg-r-button) !important;
+  transition: background-color var(--mg-dur-1) var(--mg-ease-out), color var(--mg-dur-1) var(--mg-ease-out), transform var(--mg-dur-1) var(--mg-ease-out);
+}
+[data-slot="composer-fade"] button:is([data-tour="model-pill"], [aria-label^="Model · "])::before {
+  width: 14px; height: 14px; flex-shrink: 0;
+  background-position: center; background-size: contain; background-repeat: no-repeat;
+}
+[data-slot="composer-fade"] button:is([data-tour="model-pill"], [aria-label^="Model · "]) > svg { display: none !important; }
+[data-slot="composer-fade"] button:is([data-tour="model-pill"], [aria-label^="Model · "]):is(:hover, [aria-expanded="true"]) { background: var(--mg-active) !important; color: var(--mg-text) !important; }
+
+/* Effort: the level as a word. Its menu is the slider in 41-effort.css */
+[data-slot="composer-fade"] [data-testid="reasoning-pill"] {
+  padding: 0 8px !important;
+  color: var(--mg-text-3) !important;
+  border-radius: var(--mg-r-button) !important;
+  transition: background-color var(--mg-dur-1) var(--mg-ease-out), color var(--mg-dur-1) var(--mg-ease-out), transform var(--mg-dur-1) var(--mg-ease-out);
+}
+[data-slot="composer-fade"] [data-testid="reasoning-pill"] > svg { display: none !important; }
+[data-slot="composer-fade"] [data-testid="reasoning-pill"]:is(:hover, [aria-expanded="true"]) { background: var(--mg-active) !important; color: var(--mg-text) !important; }
+
+/* Dictation: one mic. Lit while it listens. */
+[data-slot="composer-fade"] [data-slot="fan-menu-anchor"] > i { display: none !important; }
+[data-slot="composer-fade"] [data-slot="fan-menu-anchor"] > button {
+  color: var(--mg-text-3) !important;
+  transition: background-color var(--mg-dur-1) var(--mg-ease-out), color var(--mg-dur-1) var(--mg-ease-out), transform var(--mg-dur-1) var(--mg-ease-out);
+}
+[data-slot="composer-fade"] [data-slot="fan-menu-anchor"] > button:hover { background: var(--mg-active) !important; color: var(--mg-text) !important; }
+[data-slot="composer-fade"] [data-slot="fan-menu-anchor"] > button[aria-pressed="true"] { background: var(--mg-press) !important; color: var(--mg-text) !important; }
+[data-slot="composer-fade"] [data-slot="fan-menu-anchor"] > button[aria-pressed="true"] > i { animation: monograph-pulse 1.4s var(--mg-ease-in-out) infinite; }
+
+/* Chips the plugin adds beside "+" (approval mode) */
+[data-slot="composer-fade"] button.mg-chip {
+  display: inline-flex; align-items: center; gap: 5px;
+  height: 28px; padding: 0 8px 0 7px;
+  border: 0; border-radius: var(--mg-r-button) !important;
+  background: transparent;
+  font-size: 12px; line-height: 1; color: var(--mg-text-3);
+  cursor: pointer;
+  transition: background-color var(--mg-dur-1) var(--mg-ease-out), color var(--mg-dur-1) var(--mg-ease-out), transform var(--mg-dur-1) var(--mg-ease-out);
+}
+[data-slot="composer-fade"] button.mg-chip > i { font-size: 13px !important; }
+[data-slot="composer-fade"] button.mg-chip:is(:hover, [aria-expanded="true"]) { background: var(--mg-active); color: var(--mg-text); }
+[data-slot="composer-fade"] button.mg-chip[data-pending] { opacity: 0.5; }
+
+/* Every control on the row settles a little under the pointer. Disabled
+   ones do not move. */
+[data-slot="composer-fade"] :is(.\[grid-area\:menu\] > button:first-of-type, button:is([data-tour="model-pill"], [aria-label^="Model · "]), [data-testid="reasoning-pill"], [data-slot="fan-menu-anchor"] > button, button.mg-chip):not(:disabled):active {
+  transform: scale(var(--mg-press-scale));
+}
+
+/* Send / stop */
+[data-slot="composer-fade"] button[type="submit"] {
+  border-radius: 9999px !important;
+  background-color: var(--mg-primary) !important;
+  color: var(--mg-on-primary) !important;
+  opacity: 1 !important;
+  transition: background-color var(--mg-dur-1) var(--mg-ease-out), color var(--mg-dur-1) var(--mg-ease-out), transform var(--mg-dur-1) var(--mg-ease-out) !important;
+}
+[data-slot="composer-fade"] button[type="submit"]:not(:disabled):hover { background-color: var(--mg-primary-hover) !important; }
+[data-slot="composer-fade"] button[type="submit"]:not(:disabled):active { transform: scale(var(--mg-press-scale)); }
+[data-slot="composer-fade"] button[type="submit"]:disabled {
+  background-color: var(--mg-raised-2) !important;
+  color: var(--mg-text-3) !important;
+}
+
+/* Context ring sits directly left of send */
+[data-slot="composer-fade"] .\[grid-area\:controls\] > div:last-child { display: contents !important; }
+/* Named children, not `> *`: a last compound that matches any element hands
+   Blink a whole-subtree invalidation for every attribute named on its left
+   (here `data-slot` and the class), so each such change anywhere in the page
+   restyled the changed element's whole subtree (w6-cost). The grid areas are
+   matched as Hermes' own class tokens, `[grid-area:menu]` and
+   `[grid-area:controls]`, for the same reason: `[class*=…]` on the left keys
+   the rule on every class change of every element. */
+[data-slot="composer-fade"] .\[grid-area\:controls\] > :is(div, span, button) { order: 1; }
+[data-slot="composer-fade"] .\[grid-area\:controls\] :is(button[type="submit"]) { order: 30 !important; margin-left: 4px; }
+/* The ring, matched by its attribute (only rings are tried). Its wrapper had
+   a rule too, `… :has(> [data-slot="context-ring"])`: a bare :has() on the
+   right is tried on every element of the page (about 76,000 tries and 200 ms
+   in one traced 2,000-line reply, rig life l3) and matched nothing in this
+   Hermes, which draws no context ring. */
+[data-slot="composer-fade"] .\[grid-area\:controls\] [data-slot="context-ring"] { order: 20 !important; }
+
+/* Not offered: voice conversation (the fan above the mic) */
+[data-slot="fan-menu"][aria-label="Voice"],
+button[aria-label="Start voice conversation"],
+button[aria-label="End voice conversation"] { display: none !important; }
+
+/* New session: the composer comes to the middle and greets. "Empty" is
+   :root[data-mg-empty-chat], written by src/modules/05-state.js: a thread is
+   in the page and none of the page's threads has a message yet (what a
+   document-wide :has() asked here before, on every streamed row). The
+   attribute is repeated to keep that rule's specificity, (0,6,0), so it
+   still outranks the home's own composer rules in 62-home.css. */
+[data-slot="aui_intro"] { visibility: hidden !important; }
+:root[data-mg-empty-chat][data-mg-empty-chat][data-mg-empty-chat] [data-slot="composer-dock"]:not([data-popped-out]) {
+  bottom: 50% !important;
+  transform: translateY(50%) !important;
+  width: min(42rem, max(calc(100% - 10rem), min(36rem, calc(100% - 2rem)))) !important;
+  max-width: min(42rem, max(calc(100% - 10rem), min(36rem, calc(100% - 2rem)))) !important;
+  margin-left: 0;
+}
+:root[data-mg-empty-chat][data-mg-empty-chat][data-mg-empty-chat] [data-slot="composer-dock"]:not([data-popped-out])::before {
+  content: var(--mg-greeting, "What are we working on today?");
+  display: block;
+  padding: 0 0 18px 6px;
+  font-size: 1.4rem;
+  font-weight: 500;
+  letter-spacing: -0.015em;
+  color: var(--mg-text);
+  /* Opacity only, one long step. Hermes remounts the composer when an
+     overlay such as Settings closes, which plays this again; it must not
+     move when it does. */
+  animation: mg-fade-in var(--mg-dur-2) var(--mg-ease-out);
+}

@@ -1,0 +1,157 @@
+/* Home: what an empty session shows (src/modules/30-home.js).
+   It renders in the composer's underside slot. The greeting is lifted above
+   the message box; quick actions, pinned and recent sessions hang below it,
+   out of flow, so the box stays exactly where it was and does not move when
+   the lists load.
+   No :has() here: the module marks the slot's strip
+   (data-mg-home-slot="on" | "empty" | "shared") and the dock
+   (data-mg-home-dock while home shows), and clears both when home goes. */
+
+/* The slot's strip: invisible while home is not showing and it holds nothing
+   else, and no box of its own while home shows, so home's parts become rows
+   of the dock itself. */
+[data-mg-home-slot="empty"] { display: none !important; }
+[data-mg-home-slot="on"] { display: contents !important; }
+.mg-home { display: contents; }
+
+/* The box sits in the middle while home shows, as on an empty chat
+   (40-composer.css). That rule asks the whole window whether a thread has
+   messages, so a new tab next to a chat with history kept its box at the
+   bottom and home's lists fell off the screen; this one asks the dock. */
+[data-slot="composer-dock"][data-mg-home-dock]:not([data-popped-out]) {
+  bottom: 50% !important;
+  transform: translateY(50%) !important;
+  width: min(42rem, max(calc(100% - 10rem), min(36rem, calc(100% - 2rem)))) !important;
+  max-width: min(42rem, max(calc(100% - 10rem), min(36rem, calc(100% - 2rem)))) !important;
+  margin-left: 0 !important;
+}
+
+/* Greeting: replaces the dock's own line (40-composer.css) while home shows,
+   same type and the same height, plus the user's picture when there is one. */
+[data-slot="composer-dock"][data-mg-home-dock]::before { display: none !important; }
+.mg-home-hello {
+  order: -1;
+  display: flex; align-items: center; gap: 12px; min-width: 0;
+  /* The message box draws its frame 6 px inside its element. */
+  padding: 0 0 18px var(--mg-home-inset, 6px);
+}
+.mg-home-greeting {
+  margin: 0; min-width: 0;
+  font-size: 1.4rem; font-weight: 500; line-height: 1.25; letter-spacing: -0.015em;
+  color: var(--mg-text);
+  overflow-wrap: anywhere;
+}
+.mg-home-avatar {
+  flex: none; width: 28px; height: 28px; border-radius: 9999px; object-fit: cover;
+  outline: 1px solid var(--mg-hairline-strong); outline-offset: -1px;
+}
+
+/* Below the box, out of flow; scrolls on its own when the window is short.
+   The module sets max-height to the room left above the bottom of the chat;
+   the value here is only the first frame's. */
+/* One left edge for everything home draws: the message box's drawn frame,
+   6 px inside its element (--mg-home-inset). Rows put their
+   hover fill outside it (negative margin), so their text lines up with the
+   chips, the labels and the greeting; their times end at the box's right. */
+.mg-home-body {
+  position: absolute; top: 100%; left: 0; right: 0;
+  display: flex; flex-direction: column; gap: 20px;
+  max-height: max(120px, calc(50vh - 130px));
+  overflow-x: hidden; overflow-y: auto; overscroll-behavior: contain;
+  margin: 0 -8px; padding: 12px calc(8px + var(--mg-home-inset, 6px)) 8px;
+  scrollbar-width: thin; scrollbar-color: var(--mg-hairline-bold) transparent;
+  font-family: var(--mg-font);
+}
+
+/* Quick actions: a short row of starters, as the mockup's chips: a raised
+   fill, no outline, small type. */
+.mg-home-quick { display: flex; flex-wrap: wrap; gap: 6px; }
+.mg-home-action {
+  display: inline-flex; align-items: center; gap: 6px; height: 26px; padding: 0 10px 0 8px;
+  border: 0; border-radius: var(--mg-r-button);
+  background: var(--mg-raised); color: var(--mg-text-2);
+  font-size: var(--mg-fs-meta); line-height: 1; white-space: nowrap; cursor: pointer;
+  transition: background-color var(--mg-dur-1) var(--mg-ease-out), color var(--mg-dur-1) var(--mg-ease-out);
+}
+.mg-home-action .codicon { font-size: 12px !important; color: var(--mg-text-3); }
+.mg-home-action:hover { background: var(--mg-raised-2); color: var(--mg-text); }
+.mg-home-action:active { background: var(--mg-press); }
+.mg-home-action[data-mg-filled] { background: var(--mg-raised-2); color: var(--mg-text); }
+
+/* Sections */
+.mg-home-section { display: flex; flex-direction: column; gap: 2px; min-width: 0; }
+.mg-home-label {
+  margin: 0; padding: 0 0 4px;
+  font-size: var(--mg-fs-meta); font-weight: 500; line-height: 16px; letter-spacing: 0;
+  color: var(--mg-text-3);
+}
+.mg-home-list { display: flex; flex-direction: column; gap: 1px; margin: 0; padding: 0; list-style: none; }
+
+/* A row: open button (title, model, when) and a pin button over its end,
+   shown in place of the time on hover and focus. */
+.mg-home-row { position: relative; display: flex; align-items: center; min-width: 0; margin: 0 -8px; border-radius: var(--mg-r-button); }
+.mg-home-row:hover { background: var(--mg-hover); }
+.mg-home-open {
+  flex: 1; min-width: 0; display: flex; align-items: center; gap: 10px; height: 30px; padding: 0 8px;
+  border: 0; border-radius: var(--mg-r-button); background: transparent; color: var(--mg-text-2);
+  font-size: var(--mg-fs-ui); text-align: left; cursor: pointer;
+  transition: color var(--mg-dur-1) var(--mg-ease-out);
+}
+.mg-home-row:hover .mg-home-open, .mg-home-open:focus-visible { color: var(--mg-text); }
+.mg-home-title { flex: 1; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.mg-home-model {
+  flex: none; display: inline-flex; align-items: center; gap: 5px; max-width: 34%;
+  font-size: var(--mg-fs-meta); color: var(--mg-text-3);
+}
+.mg-home-model > span:last-child { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.mg-home-model .mg-logo { flex: none; width: 12px; height: 12px; background-position: center; background-size: contain; background-repeat: no-repeat; opacity: .8; }
+.mg-home-when { flex: none; min-width: 34px; text-align: right; font-size: var(--mg-fs-meta); font-variant-numeric: tabular-nums; color: var(--mg-text-3); }
+.mg-home-row:is(:hover, :focus-within, [data-mg-pinned]) .mg-home-when { opacity: 0; }
+.mg-home-pin {
+  position: absolute; right: 2px; top: 2px;
+  flex: none; display: grid; place-items: center; width: 26px; height: 26px;
+  border: 0; border-radius: var(--mg-r-tag); background: transparent; color: var(--mg-text-3);
+  opacity: 0; cursor: pointer;
+  transition: opacity var(--mg-dur-1) var(--mg-ease-out), color var(--mg-dur-1) var(--mg-ease-out), background-color var(--mg-dur-1) var(--mg-ease-out);
+}
+.mg-home-pin .codicon { font-size: 13px !important; }
+/* The time gives way to the pin on hover and whenever the row holds focus
+   (a row reached by Tab or the arrows), so that slot is never blank. */
+.mg-home-row:is(:hover, :focus-within) .mg-home-pin, .mg-home-pin[aria-pressed="true"] { opacity: 1; }
+.mg-home-pin[aria-pressed="true"] { color: var(--mg-text-3); }
+.mg-home-pin:hover { background: var(--mg-active); color: var(--mg-text); }
+
+/* Keyboard: a visible ring on everything home offers */
+.mg-home-body :is(button):focus-visible {
+  outline: 1.5px solid var(--mg-text-3) !important; outline-offset: -1.5px !important;
+}
+
+/* Loading, empty and failed states */
+.mg-home-ghost { height: 30px; margin: 0; border-radius: var(--mg-r-tag); position: relative; }
+.mg-home-ghost::after {
+  content: ""; position: absolute; left: 0; top: 11px; height: 8px; width: 62%;
+  border-radius: 4px; background: var(--mg-raised);
+  animation: monograph-pulse 1.4s ease-in-out infinite;
+}
+.mg-home-ghost:nth-child(2)::after { width: 48%; }
+.mg-home-ghost:nth-child(3)::after { width: 55%; }
+.mg-home-note {
+  display: flex; align-items: center; gap: 10px; margin: 0; padding: 4px 0;
+  font-size: var(--mg-fs-ui); line-height: 1.45; color: var(--mg-text-3);
+}
+.mg-home-retry {
+  border: 0; padding: 2px 6px; border-radius: var(--mg-r-tag); background: transparent;
+  color: var(--mg-text-2); font-size: var(--mg-fs-ui); text-decoration: underline; text-underline-offset: 2px; cursor: pointer;
+}
+.mg-home-retry:hover { color: var(--mg-text); background: var(--mg-hover); }
+
+/* Motion: home arrives once per empty session (the module decides, and sets
+   data-mg-arriving for about half a second), with a short stagger capped at
+   ten steps. Rows that come later just appear. A remount (an overlay closing,
+   a reload of the plugin) does not set it again, so nothing replays.
+   Motion off and reduced motion are the kill switch in 05-motion.css. */
+@keyframes mg-home-in { from { opacity: 0; transform: translateY(4px); } }
+.mg-home[data-mg-arriving] :is(.mg-home-hello, .mg-home-action, .mg-home-label, .mg-home-row, .mg-home-ghost, .mg-home-note) {
+  animation: mg-home-in var(--mg-dur-2) var(--mg-ease-out) both;
+  animation-delay: calc(min(var(--mg-i, 0), 10) * var(--mg-dur-1) / 4);
+}

@@ -1,0 +1,105 @@
+/* Service logos and built-in tool glyphs.
+   src/modules/00-services.js marks Hermes' tool rows; this file draws.
+   The mark sits on the element that draws it, so every rule below matches
+   that one element (or its direct children) and nothing wider:
+     data-mg-service="<id>"     a service logo in colour. build.mjs gives each id
+                                --mg-svc-img (a multi-colour mark, drawn as is) or
+                                --mg-svc-mask + --mg-svc-ink (a one-colour mark in
+                                its brand colour, lightened when the brand colour
+                                is too dark for this surface).
+     data-mg-tool-family="<f>"  a built-in tool, or an unknown one by its kind: a
+                                gray codicon.
+     data-mg-svc-head           (set by the module on a tool row's head) the
+                                mark is a flex item beside the title; elsewhere
+                                (the agent panel) it is an inline mark.
+     data-mg-svc-in             the row just arrived in a live turn.
+     data-mg-svc-row="<id>"     on a service row itself: lifts the shell's
+                                grayscale filter so the logo keeps its colour.
+   One box for every mark, 16 x 14 px at the default size: every SVG in
+   src/logos/services has a 8:7 viewBox centred on its ink and sized so that
+   sqrt(ink width x ink height) x coverage^0.3 is the same for all of them
+   (a wide mark such as Cloudflare's cloud takes the extra width; a solid
+   tile comes out smaller than an open mark). See src/logos/services/README. */
+
+/* ── The mark: one box for every logo and glyph ── */
+[data-mg-service]::before,
+[data-mg-tool-family]::before {
+  content: "";
+  display: inline-block;
+  flex: none;
+  width: calc(var(--mg-svc-size, 14px) * 8 / 7);
+  height: var(--mg-svc-size, 14px);
+  vertical-align: -2px;
+}
+[data-mg-service]:not([data-mg-svc-head])::before,
+[data-mg-tool-family]:not([data-mg-svc-head])::before { margin-inline-end: 6px; }
+
+/* ── A service: the mark, in colour ── */
+[data-mg-service]::before {
+  background: var(--mg-svc-img, none) center / contain no-repeat var(--mg-svc-ink, transparent);
+  -webkit-mask: var(--mg-svc-mask, none) center / contain no-repeat;
+  mask: var(--mg-svc-mask, none) center / contain no-repeat;
+}
+
+/* ── A built-in tool or an unknown one: gray, one glyph per family ──
+   --mg-text-2: the glyphs are thin line drawings, and at --mg-text-3 the
+   terminal one could not be read at 14 px. */
+[data-mg-tool-family]::before {
+  content: var(--mg-family-glyph, "\eb6d");
+  font: normal 14px/14px codicon;
+  text-align: center;
+  color: var(--mg-text-2);
+  -webkit-font-smoothing: antialiased;
+}
+[data-mg-tool-family="terminal"] { --mg-family-glyph: "\ea85"; }
+[data-mg-tool-family="files"] { --mg-family-glyph: "\ea7b"; }
+[data-mg-tool-family="code"] { --mg-family-glyph: "\eac4"; }
+[data-mg-tool-family="browser"] { --mg-family-glyph: "\eaae"; }
+[data-mg-tool-family="web"] { --mg-family-glyph: "\eb01"; }
+[data-mg-tool-family="search"] { --mg-family-glyph: "\ea6d"; }
+[data-mg-tool-family="memory"] { --mg-family-glyph: "\eace"; }
+[data-mg-tool-family="skills"] { --mg-family-glyph: "\eaa4"; }
+[data-mg-tool-family="delegation"] { --mg-family-glyph: "\ea7e"; }
+[data-mg-tool-family="todo"] { --mg-family-glyph: "\eab3"; }
+[data-mg-tool-family="cron"] { --mg-family-glyph: "\eb7c"; }
+[data-mg-tool-family="vision"] { --mg-family-glyph: "\ea70"; }
+[data-mg-tool-family="speech"] { --mg-family-glyph: "\eb75"; }
+[data-mg-tool-family="tools"] { --mg-family-glyph: "\eb6d"; }
+
+/* ── On a tool row's head ──
+   The mark is the head's first flex item. Hermes' own tool icon gives way;
+   its running and error glyphs (role=status, aria-label) do not. */
+[data-mg-svc-head] > .place-items-center:not(:has([role="status"], [aria-label])) { display: none !important; }
+[data-mg-svc-head] { gap: 8px !important; }
+
+/* 33-turns.css dresses a row's label only as the head's second child, the
+   one after Hermes' icon, and only on a row that opens. A tool Hermes has no
+   icon for (every MCP and connector tool) has its label first, and a row with
+   nothing to open has no aria-expanded; without this their label keeps
+   Hermes' own colour, which is dark here. Same dress for every marked row. */
+[data-mg-svc-head] > span:not(.place-items-center):is(:first-child, .place-items-center + span) {
+  font-size: 12.5px !important; font-weight: 500; color: var(--mg-text-2); text-overflow: ellipsis;
+}
+button:is(:hover, [aria-expanded="true"]) > span > [data-mg-svc-head] > span:not(.place-items-center):is(:first-child, .place-items-center + span) { color: var(--mg-text); }
+
+/* 10-shell.css turns every conversation scaffold gray with a filter, which
+   would take the colour out of the logo too. On a service row the filter
+   moves from the row to the head's own parts (the logo is the head's
+   ::before, so it keeps its colour) and to the row's open body. */
+[data-mg-svc-row] { filter: none !important; }
+[data-mg-svc-head][data-mg-service] > span,
+[data-mg-svc-row] > div + div { filter: grayscale(1); }
+
+/* ── Arrival: once, with the row, in a live turn only ──
+   The module removes data-mg-svc-in when the arrival is over, so a fold, a
+   re-render or a changed attribute cannot start it again. Motion off and
+   reduced motion: the kill switch in 05-motion.css. */
+[data-mg-svc-in]::before { animation: mg-svc-in var(--mg-dur-2) var(--mg-ease-out) both; }
+@keyframes mg-svc-in { from { opacity: 0; transform: scale(0.8); } }
+
+/* ── A failed call, shut ──
+   The module marks the head of a call that failed (data-mg-failed, from the
+   call's own result); a circled cross after the title says so in gray. */
+[data-mg-svc-head][data-mg-failed]::after {
+  content: "\ea87"; flex: none; font: normal 12px/1 codicon; color: var(--mg-text-2);
+}

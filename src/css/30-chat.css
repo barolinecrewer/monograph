@@ -1,0 +1,166 @@
+/* Chat: one reading column. The user speaks in a raised tile, the assistant
+   speaks on the field, and structure inside a reply is drawn with hairlines. */
+
+/* Reading measure. Thread and composer share one centred column instead of
+   running the full width of the pane. */
+:root { --composer-width: 48rem !important; }
+
+/* ── User turn ── */
+[data-role="user"] { align-items: flex-end !important; --dt-user-bubble: var(--mg-raised-2); }
+[data-role="user"] .composer-human-message {
+  width: auto !important;
+  max-width: min(78%, 36rem) !important;
+  margin-left: auto !important;
+  padding: 8px 14px !important;
+  border: 0 !important;
+  border-radius: var(--mg-r-bubble) !important;
+  background-color: var(--mg-raised-2) !important;
+  box-shadow: none !important;
+  backdrop-filter: none !important;
+  -webkit-backdrop-filter: none !important;
+  color: var(--mg-text) !important;
+}
+[data-role="user"][data-mf-dup="1"],
+[data-role="user"][data-mf-dup="1"] + div:not([data-role]) { display: none !important; }
+
+/* Sent images: small tiles above the bubble (image-cards plugin) */
+[data-mf-att="moved"], [data-mf-moved="1"] { display: none !important; }
+.mf-att-strip { display: flex; flex-wrap: wrap; justify-content: flex-end; gap: 6px; margin: 0 0 6px auto; max-width: min(78%, 36rem); }
+.mf-att-card {
+  width: 64px; height: 64px; padding: 0; overflow: hidden; cursor: zoom-in;
+  border: 1px solid var(--mg-hairline-strong); border-radius: var(--mg-r-chip);
+  background: var(--mg-raised);
+  transition: border-color var(--mg-dur-1) var(--mg-ease-out);
+}
+.mf-att-card:hover { border-color: var(--mg-hairline-bold); }
+.mf-att-card img { width: 100%; height: 100%; object-fit: cover; display: block; }
+
+/* ── Assistant turn: no surface of its own ── */
+[data-role="assistant"] { background-color: transparent !important; box-shadow: none !important; }
+
+/* Inline code: a raised tag, no outline */
+[data-role="assistant"] .aui-md :not(pre) > code {
+  padding: 1px 4px !important;
+  border: 0 !important;
+  border-radius: 5px !important;
+  background-color: var(--mg-raised) !important;
+  color: var(--mg-text) !important;
+}
+
+/* Code blocks sit in a well */
+[data-role="assistant"] [data-slot="code-card"] {
+  --ui-bg-editor: var(--mg-well);
+  --expandable-fade-from: var(--mg-well);
+  border: 1px solid var(--mg-hairline) !important;
+  border-radius: var(--mg-r-chip) !important;
+  background-color: var(--mg-well) !important;
+  box-shadow: none !important;
+}
+
+/* Tables: hairline frame, quiet header, a rule between rows */
+[data-role="assistant"] .aui-md-table {
+  border: 1px solid var(--mg-hairline) !important;
+  border-radius: var(--mg-r-chip) !important;
+}
+[data-role="assistant"] .aui-md-table th {
+  background-color: rgba(255, 255, 255, 0.025) !important;
+  color: var(--mg-text-2) !important;
+  font-weight: 500 !important;
+}
+[data-role="assistant"] .aui-md-table :is(tr, th, td) { border-color: var(--mg-hairline) !important; }
+[data-role="assistant"] .aui-md-table tbody td { border-top: 1px solid var(--mg-hairline) !important; }
+
+[data-role="assistant"] .aui-md blockquote {
+  border-left: 2px solid var(--mg-hairline-bold) !important;
+  color: var(--mg-text-2) !important;
+}
+[data-role="assistant"] .aui-md hr { border-color: var(--mg-hairline) !important; }
+[data-role="assistant"] .aui-md li::marker { color: var(--mg-text-3); }
+
+/* Tool rows, when shown: text on the field, no boxes. The boxes inside a
+   tool block are drawn by Tailwind's border width classes (the call's
+   preview, its output, the file chips: `border`, `border-b`), so those are
+   named instead of every element under a tool block. */
+[data-role="assistant"] [data-slot="tool-block"],
+[data-role="assistant"] [data-slot="tool-block"] :is(.border, .border-b, .border-t, .border-l, .border-r) { border-color: transparent !important; }
+
+/* ── Live status line (live-status plugin) ── */
+#mf-live { display: flex; align-items: center; gap: 8px; margin-top: 8px; font-size: 0.85em; color: var(--mg-text-3); }
+#mf-live svg { flex-shrink: 0; overflow: visible; }
+#mf-live .mf-inf-base { fill: none; stroke: currentColor; stroke-opacity: .18; stroke-width: 1.6; }
+#mf-live .mf-inf-run { fill: none; stroke: var(--mg-text); stroke-width: 1.8; stroke-linecap: round; stroke-dasharray: 22 78; animation: mf-inf 1.6s linear infinite; }
+:root[data-mg-motion="off"] #mf-live :is(.mf-inf-run, .mf-in) { animation: none !important; }
+@media (prefers-reduced-motion: reduce) { #mf-live :is(.mf-inf-run, .mf-in) { animation: none !important; } }
+#mf-live[data-kind="error"] { color: var(--mg-text-2); }
+#mf-live[data-kind="error"] .mf-inf-run { stroke: var(--mg-primary); animation-duration: .9s; }
+#mf-live .mf-live-text { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+#mf-live .mf-in { animation: mf-textin var(--mg-dur-3) var(--mg-ease-out) both; }
+/* One indicator, not two: when the live-status line is in a reply, Hermes' own
+   activity row (dither square + timer) and its loading row step aside.
+   live-status puts its line last in the running row's content, after the
+   activity row (a sibling), or right after the loading row. Each :has() sits
+   on the element that hides, never on a reply or a turn pair: Blink restyles
+   the whole subtree of an element whose :has() is not in the last compound
+   (Hermes' own `group-has-[…]` rules end in `*`, and every non-subject :has()
+   shares one invalidation set) each time a node streams in under it. With
+   `:is([data-role="assistant"], [data-slot="aui_turn-pair"]):has(#mf-live)
+   [data-slot="aui_turn-activity"]` that was the whole running turn pair, about
+   5,300 elements, some 240 times per 2,000-line reply (w6-cost). */
+[data-slot="aui_turn-activity"]:has(~ #mf-live),
+[data-slot="aui_response-loading"]:has(+ #mf-live) { display: none !important; }
+
+/* ── Hermes' own status row ──
+   It shows whenever no live-status line stands in for it: in any build
+   without that plugin, and as "Summarizing thread" under a stopped reply.
+   Drawn as the live line above is: the loop, the label, the time right after
+   the label. The loop is Hermes' own pulse element, masked: the mask image
+   carries the running dash, so nothing is added to the page. */
+:is([data-slot="aui_turn-activity"][data-state="active"], [data-slot="aui_response-loading"]) {
+  --mg-loop: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23000' stroke-linecap='round'%3E%3Cstyle%3E%40keyframes r%7Bto%7Bstroke-dashoffset:-100%7D%7D%3C/style%3E%3Cpath d='M12 12c-2-2.67-4-4-6-4a4 4 0 1 0 0 8c2 0 4-1.33 6-4Zm0 0c2 2.67 4 4 6 4a4 4 0 0 0 0-8c-2 0-4 1.33-6 4Z' stroke-width='1.6' stroke-opacity='.2'/%3E%3Cpath d='M12 12c-2-2.67-4-4-6-4a4 4 0 1 0 0 8c2 0 4-1.33 6-4Zm0 0c2 2.67 4 4 6 4a4 4 0 0 0 0-8c-2 0-4 1.33-6 4Z' stroke-width='1.8' pathLength='100' stroke-dasharray='22 78' style='animation:r 1.6s linear infinite'/%3E%3C/svg%3E");
+  gap: 8px !important; margin-top: 8px; font-size: 0.85em; color: var(--mg-text-3) !important; --conversation-scaffold-text: var(--mg-text-3);
+}
+:is([data-slot="aui_turn-activity"][data-state="active"], [data-slot="aui_response-loading"]) > .dither {
+  flex: none; width: 18px !important; height: 18px !important; border-radius: 0 !important; background: var(--mg-text) !important;
+  -webkit-mask: var(--mg-loop) center / 18px 18px no-repeat; mask: var(--mg-loop) center / 18px 18px no-repeat;
+}
+:is([data-slot="aui_turn-activity"][data-state="active"], [data-slot="aui_response-loading"]) > .shimmer { flex: 0 1 auto !important; font-size: inherit !important; }
+:is([data-slot="aui_turn-activity"][data-state="active"], [data-slot="aui_response-loading"]) > .inline-flex:last-child { font-size: 10.5px !important; letter-spacing: .02em; font-variant-numeric: tabular-nums; color: var(--mg-text-3) !important; }
+/* Motion off or reduced: the loop, whole and still. */
+:root[data-mg-motion="off"] :is([data-slot="aui_turn-activity"][data-state="active"], [data-slot="aui_response-loading"]) { --mg-loop: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23000' stroke-linecap='round'%3E%3Cpath d='M12 12c-2-2.67-4-4-6-4a4 4 0 1 0 0 8c2 0 4-1.33 6-4Zm0 0c2 2.67 4 4 6 4a4 4 0 0 0 0-8c-2 0-4 1.33-6 4Z' stroke-width='1.6' stroke-opacity='.55'/%3E%3C/svg%3E"); }
+@media (prefers-reduced-motion: reduce) { :is([data-slot="aui_turn-activity"][data-state="active"], [data-slot="aui_response-loading"]) { --mg-loop: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23000' stroke-linecap='round'%3E%3Cpath d='M12 12c-2-2.67-4-4-6-4a4 4 0 1 0 0 8c2 0 4-1.33 6-4Zm0 0c2 2.67 4 4 6 4a4 4 0 0 0 0-8c-2 0-4 1.33-6 4Z' stroke-width='1.6' stroke-opacity='.55'/%3E%3C/svg%3E"); } }
+
+/* ── Noise removed from the thread ── */
+[data-slot="aui_changed-files"] { display: none !important; }
+[data-role="system"]:has(.tool-memory-legendary-glyph) { display: none !important; }
+[data-slot="thread-timeline-ticks"] { display: none !important; }
+
+/* "Response stopped" becomes a small quiet tag, on the text's left edge (the
+   message content already carries the indent) */
+[data-slot="aui_assistant-message-stopped"] { display: inline-flex !important; align-items: center !important; gap: 6px !important; width: fit-content !important; margin: 10px 0 2px !important; padding: 2px 9px 2px 8px !important; border-radius: var(--mg-r-tag) !important; border: 1px solid var(--mg-hairline) !important; font-size: 0 !important; line-height: 1 !important; color: var(--mg-text-3) !important; }
+[data-slot="aui_assistant-message-stopped"] > :is(i, span, svg) { display: none !important; }
+[data-slot="aui_assistant-message-stopped"]::before { content: ""; width: 5px; height: 5px; border-radius: 1.5px; background: currentColor; opacity: .8; }
+[data-slot="aui_assistant-message-stopped"]::after { content: "Stopped"; font-size: 10.5px; letter-spacing: .03em; line-height: 16px; }
+
+/* ── Queued prompts ──
+   The plugin draws the bubble Hermes leaves out (see queuedBubbles), inside
+   the reply it belongs to. It takes over as the pinned prompt from there on,
+   so the prompt above stops following the scroll; with several in one reply
+   only the last one pins. */
+[data-slot="aui_response-group"] > [data-mg-queued] { margin-top: var(--conversation-turn-gap, 1rem); }
+/* Asked of the prompt itself (its turn's response group follows it), not of
+   the turn pair: see the live-status rule above for what a :has() on a turn
+   pair costs while a reply streams. */
+[data-slot="aui_turn-pair"] > [data-slot="aui_user-message-root"]:has(~ [data-slot="aui_response-group"] > [data-mg-queued]),
+[data-mg-queued]:has(~ [data-mg-queued]) { position: relative; top: auto; }
+[data-mg-queued]:not([data-mg-long]) .composer-human-message { cursor: default; }
+
+/* A folded prompt shows whole lines. Hermes clamps a bubble to
+   4 x 1.3 x font-size + 0.15rem, but a bubble's own line-height is 1.5 (the
+   queued copy's text, written as one pre-wrap text node, draws at 1.5),
+   which cut the fourth line through the middle (3.59 lines). Here the clamp
+   draws at the prompt's 1.3 and holds exactly four of its lines; Hermes'
+   fade (data-clamped) is kept, and so is the queued copy's unfold (the
+   plugin toggles the class). */
+[data-slot="aui_user-message-root"] .sticky-human-clamp { line-height: var(--human-msg-line-height, 1.3); max-height: 4lh; }
+/* Unfolded, the queued copy keeps the prompt's line height. */
+[data-mg-queued] [data-mg-clamp] { line-height: var(--human-msg-line-height, 1.3); }

@@ -1,0 +1,82 @@
+/* Floating surfaces: opaque raised step with a hairline edge. No blur, no shadow. */
+[data-slot="dropdown-menu-content"], [data-slot="dropdown-menu-sub-content"],
+[data-slot="context-menu-content"], [data-slot="popover-content"],
+[data-slot="select-content"], [data-slot="dialog-content"], [role="menu"], [role="listbox"] {
+  border-radius: var(--mg-r-card) !important;
+  background: var(--mg-raised) !important;
+  backdrop-filter: none !important;
+  -webkit-backdrop-filter: none !important;
+  border: 1px solid var(--mg-hairline-strong) !important;
+  box-shadow: none !important;
+}
+[data-slot="dropdown-menu-item"], [data-slot="dropdown-menu-sub-trigger"], [role="menuitem"], [role="option"] { border-radius: var(--mg-r-tag) !important; }
+/* A destructive row (Delete, Remove, Reject): Hermes' red is a gray here, so
+   the row is told by weight and its glyph (a trash can, drawn by Hermes) in
+   the full text colour. */
+:is([data-slot="dropdown-menu-item"], [data-slot="context-menu-item"])[data-variant="destructive"] { font-weight: 600; color: var(--mg-text) !important; }
+:is([data-slot="dropdown-menu-item"], [data-slot="context-menu-item"])[data-variant="destructive"] > :is(svg, .codicon) { color: var(--mg-text) !important; }
+/* The session row's menu is a fixed 10rem (w-40); at our row padding
+   "Move to project" broke onto two lines. It grows to its longest row. */
+:is([data-slot="context-menu-content"], [data-slot="dropdown-menu-content"]).w-40 { width: max-content !important; min-width: 10rem; }
+/* What lies under a dialog or a full-page overlay is dimmed, not blurred.
+   (A blurred backdrop is also re-sampled on every frame while it fades.) */
+[data-slot="dialog-overlay"], [data-overlay-surface] { backdrop-filter: none !important; -webkit-backdrop-filter: none !important; }
+/* A full-page overlay (Settings) hangs its search pill across the card's top
+   edge, half outside the frame. It moves inside, onto the line of the close
+   button and just left of it, clear of the breadcrumb on the left. */
+[data-overlay-surface] > div > [data-glass-raised] ~ div[class~="top-0"] {
+  top: calc(0.1875rem + var(--titlebar-height, 34px) / 2) !important;
+  left: auto !important; right: calc(var(--titlebar-tools-right, 0.75rem) + 36px) !important;
+  translate: 0 -50% !important;
+}
+
+/* Model logos (model menu rows). Images come from src/logos via --mg-logo-*. */
+.mg-logo { display: block; width: 14px; height: 14px; background: center / contain no-repeat; }
+
+/* Approval mode menu (composer chip) */
+[data-slot="dropdown-menu-content"].mg-approval-menu { width: 272px; padding: 4px !important; }
+.mg-approval-row { display: flex !important; align-items: flex-start !important; gap: 10px; padding: 7px 8px !important; }
+.mg-approval-row > span { display: flex; min-width: 0; flex: 1; flex-direction: column; gap: 2px; }
+.mg-approval-row b { font-size: 12.5px; font-weight: 500; color: var(--mg-text); }
+.mg-approval-row small { font-size: 11.5px; line-height: 1.35; color: var(--mg-text-3); }
+.mg-approval-row > i { margin-top: 1px; font-size: 13px !important; color: var(--mg-text); }
+
+/* Model menu rows: logo, name, and the tick on the current one. The favourite
+   star moves to the far end and shows when the row is pointed at; the
+   submenu chevron goes (every row opens one). */
+[data-slot="dropdown-menu-content"]:has([data-slot="model-menu-row-icon"]) [data-slot="dropdown-menu-sub-trigger"] {
+  gap: 8px !important;
+
+  > i.codicon:last-child { display: none !important; } /* the chevron; its class is built at runtime */
+  > button[aria-pressed] {
+    order: 9; margin: 0 !important;
+    opacity: 0; color: var(--mg-text-3) !important;
+    transition: opacity var(--mg-dur-1) var(--mg-ease-out), color var(--mg-dur-1) var(--mg-ease-out);
+  }
+  > button[aria-pressed]:hover { color: var(--mg-text) !important; }
+  > [data-slot="badge"] { background: transparent !important; color: var(--mg-text-3) !important; padding: 0 !important; }
+}
+[data-slot="dropdown-menu-content"]:has([data-slot="model-menu-row-icon"]) [data-slot="dropdown-menu-sub-trigger"]:is(:hover, [data-highlighted], [data-state="open"]) > button[aria-pressed] { opacity: 1; }
+
+/* Model selector in the composer: picking a model is all it does. Effort and
+   Thinking live in the pill right beside it, so here they are gone from both
+   places they showed: the chip on a row and the per-row flyout. The flyout
+   only opens for a model that has a speed switch (Fast, Ultrafast, Daybreak).
+   Model menus anywhere else keep everything: no effort pill sits next to them.
+   "Opened from the composer" is :root[data-mg-menu="model"], written by
+   src/modules/05-state.js while the composer's model pill is open; it used to
+   be asked of the whole document with a :has() on the root. `html:root` and the
+   repeated attribute keep that rule's specificity, (0,4,1). */
+html:root[data-mg-menu="model"][data-mg-menu][data-mg-menu] [data-slot="dropdown-menu-sub-trigger"] > [data-slot="badge"]:not([data-mg-chip="keep"]) { display: none !important; }
+/* While the menu plays its exit its pill is already closed, so the rule above
+   lets go and the chips would come back mid-fade. A closing model menu keeps
+   them hidden. (A model menu elsewhere loses its chips for the same 120ms,
+   while it fades out.) */
+[data-slot="dropdown-menu-content"][data-state="closed"]:has([data-slot="model-menu-row-icon"]) [data-slot="dropdown-menu-sub-trigger"] > [data-slot="badge"]:not([data-mg-chip="keep"]) { display: none !important; }
+html:root[data-mg-menu="model"][data-mg-menu][data-mg-menu] [data-slot="dropdown-menu-sub-content"] {
+  > [data-slot="dropdown-menu-radio-group"],
+  > [data-slot="dropdown-menu-label"]:has(+ [data-slot="dropdown-menu-radio-group"]),
+  > [data-slot="dropdown-menu-separator"]:has(+ [data-slot="dropdown-menu-label"] + [data-slot="dropdown-menu-radio-group"]),
+  > [data-slot="dropdown-menu-item"]:has([data-slot="switch"]:not([aria-label])) { display: none !important; }
+}
+html:root[data-mg-menu="model"][data-mg-menu][data-mg-menu] [data-slot="dropdown-menu-sub-content"]:not(:has(> [data-slot="dropdown-menu-item"] [data-slot="switch"][aria-label])) { display: none !important; }

@@ -1,0 +1,430 @@
+/* Agent panel (src/modules/20-agent-panel.js): the right-hand pane with the
+   focused session's trace. Flat, hairlines, grayscale; colour only on bots
+   and service logos. Rows ease in once, when they arrive; nothing moves with
+   motion off. The pane contains its own layout and paint, so nothing in it
+   makes the chat column do work. */
+
+.mg-agent {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  min-width: 0;
+  contain: layout paint style;
+  font-family: var(--mg-font);
+  font-size: var(--mg-fs-ui);
+  color: var(--mg-text-2);
+  background: var(--mg-canvas);
+}
+
+.mg-agent-bar {
+  display: flex;
+  align-items: center;
+  gap: var(--mg-s-2);
+  flex: 0 0 auto;
+  height: var(--mg-header-h);
+  padding: 0 var(--mg-s-2) 0 var(--mg-s-4);
+  border-bottom: 1px solid var(--mg-hairline);
+  color: var(--mg-text);
+  font-weight: 500;
+}
+
+.mg-agent-bar > .codicon { font-size: 14px; color: var(--mg-text-3); }
+.mg-agent-bar > span { flex: 1 1 auto; min-width: 0; }
+
+.mg-agent-close {
+  display: grid;
+  place-items: center;
+  width: 24px;
+  height: 24px;
+  border-radius: var(--mg-r-tag);
+  color: var(--mg-text-3);
+  background: transparent;
+  transition: background-color var(--mg-dur-1) var(--mg-ease-out), color var(--mg-dur-1) var(--mg-ease-out);
+}
+
+.mg-agent-close:hover { background: var(--mg-hover); color: var(--mg-text); }
+
+.mg-agent-scroll {
+  flex: 1 1 auto;
+  min-height: 0;
+  overflow-y: auto;
+  padding: var(--mg-s-3) var(--mg-s-4) var(--mg-s-6);
+  contain: strict;
+}
+
+/* Pinned to the newest step by scroll anchoring: only the anchor at the end
+   may be chosen, so the list follows new rows while the end is in view and
+   holds still once the reader scrolls up. */
+.mg-agent-trace,
+.mg-agent-approval,
+.mg-agent-todo,
+.mg-agent-empty { overflow-anchor: none; }
+.mg-agent-anchor { overflow-anchor: auto; height: 1px; }
+
+.mg-agent-empty,
+.mg-agent-note {
+  margin: var(--mg-s-2) 0;
+  color: var(--mg-text-3);
+  font-size: var(--mg-fs-meta);
+  line-height: 1.5;
+}
+
+/* Header line: chevron, "Worked for 3m 38s", step count */
+.mg-agent-head {
+  display: flex;
+  align-items: center;
+  gap: var(--mg-s-2);
+  width: 100%;
+  height: 28px;
+  padding: 0;
+  background: transparent;
+  color: var(--mg-text-2);
+  text-align: left;
+}
+
+.mg-agent-head:hover { color: var(--mg-text); }
+.mg-agent-head .codicon { font-size: 13px; color: var(--mg-text-3); transition: transform var(--mg-dur-2) var(--mg-ease-out); }
+.mg-agent-head[aria-expanded="false"] .codicon { transform: rotate(-90deg); }
+.mg-agent-elapsed { font-variant-numeric: tabular-nums; }
+.mg-agent-count { margin-left: auto; color: var(--mg-text-3); font-size: var(--mg-fs-meta); }
+
+.mg-agent-trace[data-mg-status="running"] .mg-agent-elapsed {
+  color: var(--mg-text);
+}
+
+.mg-agent-status {
+  margin: 0 0 var(--mg-s-1) 21px;
+  color: var(--mg-text-3);
+  font-size: var(--mg-fs-meta);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.mg-agent-label {
+  display: flex;
+  align-items: center;
+  gap: var(--mg-s-2);
+  min-width: 0;
+  height: 26px;
+  color: var(--mg-text-2);
+}
+
+.mg-agent-label .codicon { width: 13px; font-size: 13px; color: var(--mg-text-3); }
+.mg-agent-queries { min-width: 0; color: var(--mg-text-3); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+
+/* Searched: site chips, as in the mockup */
+.mg-agent-chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  margin: 2px 0 var(--mg-s-2) 21px;
+}
+
+.mg-agent-chip,
+.mg-agent-more {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  max-width: 100%;
+  height: 22px;
+  padding: 0 8px;
+  border-radius: var(--mg-r-tag);
+  background: var(--mg-raised);
+  color: var(--mg-text-2);
+  font-size: var(--mg-fs-meta);
+  white-space: nowrap;
+}
+
+.mg-agent-chip > span:last-child { overflow: hidden; text-overflow: ellipsis; }
+.mg-agent-chip:not([data-mg-known]) { color: var(--mg-text-3); }
+/* A site with no service of its own: a neutral globe in the logo's box. */
+.mg-agent-site { flex: 0 0 auto; width: 16px; font-size: 13px; text-align: center; color: var(--mg-text-3); }
+.mg-agent-more { background: transparent; color: var(--mg-text-3); padding: 0 4px; }
+.mg-agent-more:hover { color: var(--mg-text); }
+
+.mg-agent-svc { flex: 0 0 auto; display: inline-flex; width: 16px; height: 14px; }
+/* The logo box is the services one (16 x 14, 34-services.css); here the
+   span is the box, so no gap after the mark. */
+.mg-agent-svc[data-mg-service]::before { margin-inline-end: 0; vertical-align: top; }
+
+/* Steps: a rail of dots, label, argument, time */
+.mg-agent-steps,
+.mg-agent-agents ul {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+
+.mg-agent-steps { position: relative; margin-top: 2px; }
+
+.mg-agent-steps::before {
+  content: "";
+  position: absolute;
+  top: 10px;
+  bottom: 10px;
+  left: 3px;
+  width: 1px;
+  background: var(--mg-hairline);
+}
+
+.mg-agent-step,
+.mg-agent-sub {
+  position: relative;
+  display: flex;
+  align-items: center;
+  gap: var(--mg-s-2);
+  min-height: 28px;
+  contain: layout style;
+}
+
+/* The rail dot is the row's own ::before: one element less per row. */
+.mg-agent-step::before {
+  content: "";
+  flex: 0 0 auto;
+  width: 7px;
+  height: 7px;
+  border-radius: 9999px;
+  background: var(--mg-text-4);
+  box-shadow: 0 0 0 3px var(--mg-canvas);
+}
+
+.mg-agent-step[data-state="running"]::before {
+  background: var(--mg-canvas);
+  box-shadow: inset 0 0 0 1.5px var(--mg-text-2), 0 0 0 3px var(--mg-canvas);
+  animation: mg-agent-breathe 1.4s var(--mg-ease-in-out) infinite;
+}
+
+.mg-agent-step[data-state="failed"]::before { background: var(--mg-text-2); }
+.mg-agent-step[data-state="stopped"]::before { background: var(--mg-canvas); box-shadow: inset 0 0 0 1px var(--mg-text-4), 0 0 0 3px var(--mg-canvas); }
+
+.mg-agent-step > .codicon,
+.mg-agent-step > .mg-agent-svc {
+  flex: 0 0 auto;
+  width: 16px;
+  font-size: 13px;
+  color: var(--mg-text-3);
+}
+
+.mg-agent-text {
+  display: flex;
+  align-items: baseline;
+  gap: 6px;
+  flex: 1 1 auto;
+  min-width: 0;
+  white-space: nowrap;
+  overflow: hidden;
+}
+
+.mg-agent-text > b { flex: 0 0 auto; font-weight: 500; color: var(--mg-text-2); }
+.mg-agent-text > span { min-width: 0; overflow: hidden; text-overflow: ellipsis; color: var(--mg-text-3); }
+
+/* A step's text: the label in <b>, then the argument as plain text. */
+.mg-agent-step .mg-agent-text {
+  display: block;
+  color: var(--mg-text-3);
+  text-overflow: ellipsis;
+}
+
+.mg-agent-step .mg-agent-text > b { margin-right: 6px; }
+.mg-agent-step[data-state="running"] .mg-agent-text > b { color: var(--mg-text); }
+.mg-agent-step[data-mg-kind="think"] .mg-agent-text,
+.mg-agent-step[data-mg-kind="note"] .mg-agent-text,
+.mg-agent-step[data-mg-kind="think"] .mg-agent-text > b,
+.mg-agent-step[data-mg-kind="note"] .mg-agent-text > b { font-weight: 400; color: var(--mg-text-3); }
+
+/* Time, from the row's data-mg-time; a failed step says so before it. */
+.mg-agent-step::after {
+  content: attr(data-mg-time);
+  flex: 0 0 auto;
+  min-width: 34px;
+  color: var(--mg-text-3);
+  font-family: ui-monospace, "SF Mono", Menlo, monospace;
+  font-size: 11px;
+  font-variant-numeric: tabular-nums;
+  text-align: right;
+}
+
+.mg-agent-step[data-state="failed"]::after {
+  content: "failed  " attr(data-mg-time);
+  color: var(--mg-text-2);
+  white-space: pre;
+}
+
+.mg-agent-time {
+  flex: 0 0 auto;
+  min-width: 34px;
+  color: var(--mg-text-3);
+  font-family: ui-monospace, "SF Mono", Menlo, monospace;
+  font-size: 11px;
+  font-variant-numeric: tabular-nums;
+  text-align: right;
+}
+
+.mg-agent-earlier { padding-left: 21px; min-height: 26px; color: var(--mg-text-3); font-size: var(--mg-fs-meta); display: flex; align-items: center; }
+.mg-agent-earlier button { padding: 0; background: transparent; color: var(--mg-text-3); }
+.mg-agent-earlier button:hover { color: var(--mg-text); }
+
+/* Sub-agents with the little bots */
+.mg-agent-agents { margin-top: var(--mg-s-3); padding-top: var(--mg-s-2); border-top: 1px solid var(--mg-hairline); }
+.mg-agent-sub { min-height: 32px; }
+.mg-agent-bot { flex: 0 0 auto; overflow: visible; }
+.mg-agent-sub .mg-agent-text { flex-direction: column; align-items: stretch; gap: 0; }
+.mg-agent-sub .mg-agent-text > b,
+.mg-agent-sub .mg-agent-text > span { overflow: hidden; text-overflow: ellipsis; }
+.mg-agent-sub .mg-agent-text > span { font-size: var(--mg-fs-meta); }
+.mg-agent-sub[data-state="running"] .mg-agent-text > b { color: var(--mg-text); }
+
+.mg-agent-eye { transform-box: fill-box; transform-origin: center; }
+.mg-agent-bot[data-state="running"] .mg-agent-eye { animation: mg-agent-blink 3.2s var(--mg-ease-in-out) infinite; }
+.mg-agent-bot[data-state="done"],
+.mg-agent-bot[data-state="stopped"] { opacity: 0.8; }
+
+/* A sub-agent row opens its own trace */
+.mg-agent-sub-open {
+  display: flex; align-items: center; gap: var(--mg-s-2); width: 100%; min-width: 0; min-height: 32px;
+  margin: 0 -6px; padding: 0 6px; border-radius: var(--mg-r-tag);
+  background: transparent; color: inherit; font: inherit; text-align: left;
+  transition: background-color var(--mg-dur-1) var(--mg-ease-out);
+}
+.mg-agent-sub-open:hover { background: var(--mg-hover); }
+.mg-agent-sub-open:focus-visible, .mg-agent-back:focus-visible, .mg-agent-todo-head:focus-visible, .mg-agent-earlier button:focus-visible {
+  outline: 1.5px solid var(--mg-text-3); outline-offset: -1.5px;
+}
+.mg-agent-sub-go { flex: 0 0 auto; font-size: 12px !important; color: var(--mg-text-3); }
+.mg-agent-sub-open:hover .mg-agent-sub-go { color: var(--mg-text-2); }
+
+.mg-agent-back {
+  display: inline-flex; align-items: center; gap: 6px; height: 24px; margin: 0 0 var(--mg-s-2) -6px; padding: 0 6px;
+  border-radius: var(--mg-r-tag); background: transparent; color: var(--mg-text-3); font-size: var(--mg-fs-meta);
+}
+.mg-agent-back:hover { background: var(--mg-hover); color: var(--mg-text); }
+/* Back stays in view however far the sub-trace is scrolled (a new turn can
+   scroll the pane while a sub-trace is open). Opaque, on the pane's surface. */
+.mg-agent-subtrace > .mg-agent-back { position: sticky; top: calc(-1 * var(--mg-s-3)); z-index: 1; background: var(--mg-canvas); }
+.mg-agent-subtrace > .mg-agent-back:hover { background: var(--mg-hover); }
+.mg-agent-back .codicon { font-size: 12px; }
+.mg-agent-subhead { display: flex; align-items: center; gap: var(--mg-s-2); min-height: 36px; margin-bottom: var(--mg-s-1); padding-bottom: var(--mg-s-2); border-bottom: 1px solid var(--mg-hairline); }
+.mg-agent-subhead .mg-agent-text { flex-direction: column; align-items: stretch; gap: 0; }
+.mg-agent-subhead .mg-agent-text > b { color: var(--mg-text); overflow: hidden; text-overflow: ellipsis; }
+.mg-agent-subhead .mg-agent-text > span { font-size: var(--mg-fs-meta); }
+.mg-agent-summary { margin: var(--mg-s-3) 0 0; padding-top: var(--mg-s-2); border-top: 1px solid var(--mg-hairline); color: var(--mg-text-3); font-size: var(--mg-fs-meta); line-height: 1.5; }
+
+/* The plan: Hermes' todo list, as a card */
+.mg-agent-todo {
+  margin-top: var(--mg-s-4); padding: var(--mg-s-1) var(--mg-s-3) var(--mg-s-2);
+  border: 1px solid var(--mg-hairline-strong); border-radius: var(--mg-r-card); background: var(--mg-surface);
+  overflow-anchor: none;
+}
+.mg-agent-todo-head {
+  display: flex; align-items: center; gap: var(--mg-s-2); width: 100%; height: 32px; padding: 0;
+  background: transparent; color: var(--mg-text); text-align: left;
+}
+.mg-agent-todo-head b { font-weight: 500; }
+.mg-agent-todo-head > .codicon { font-size: 13px; color: var(--mg-text-3); }
+.mg-agent-todo-fold { transition: transform var(--mg-dur-2) var(--mg-ease-out); }
+.mg-agent-todo-head[aria-expanded="false"] .mg-agent-todo-fold { transform: rotate(-90deg); }
+.mg-agent-todo-list { list-style: none; margin: 0; padding: var(--mg-s-1) 0 0; border-top: 1px solid var(--mg-hairline); }
+.mg-agent-todo-item { display: flex; align-items: flex-start; gap: var(--mg-s-2); min-height: 24px; padding: 3px 0; color: var(--mg-text-2); line-height: 18px; }
+.mg-agent-todo-item[data-mg-depth="1"] { padding-left: 18px; }
+.mg-agent-todo-text { flex: 1 1 auto; min-width: 0; overflow-wrap: anywhere; }
+/* The mark: an empty ring to do, a ring with a centre in progress, a
+   filled disc with a tick done, a ring with a bar stopped, a struck line
+   cancelled. Drawn, not glyphs, so all five sit on one 12 px box. */
+.mg-agent-todo-mark {
+  position: relative; flex: 0 0 auto; width: 12px; height: 12px; margin-top: 3px;
+  border: 1px solid var(--mg-text-4); border-radius: 9999px;
+}
+.mg-agent-todo-item[data-state="in_progress"] { color: var(--mg-text); }
+.mg-agent-todo-item[data-state="in_progress"] .mg-agent-todo-mark { border-color: var(--mg-text-2); }
+.mg-agent-todo-item[data-state="in_progress"] .mg-agent-todo-mark::after {
+  content: ""; position: absolute; inset: 2.5px; border-radius: 9999px; background: var(--mg-text-2);
+  animation: mg-agent-breathe 1.4s var(--mg-ease-in-out) infinite;
+}
+.mg-agent-todo-item[data-state="completed"] { color: var(--mg-text-3); }
+.mg-agent-todo-item[data-state="completed"] .mg-agent-todo-mark { border-color: var(--mg-text-3); background: var(--mg-text-3); }
+.mg-agent-todo-item[data-state="completed"] .mg-agent-todo-mark::after {
+  content: ""; position: absolute; left: 3.5px; top: 1.5px; width: 3px; height: 6px;
+  border: solid var(--mg-surface); border-width: 0 1.5px 1.5px 0; transform: rotate(45deg);
+}
+.mg-agent-todo-item[data-state="stopped"] .mg-agent-todo-mark { border-style: dashed; border-color: var(--mg-text-3); }
+.mg-agent-todo-item[data-state="stopped"] .mg-agent-todo-mark::after {
+  content: ""; position: absolute; left: 2.5px; right: 2.5px; top: 4.5px; height: 1px; background: var(--mg-text-3);
+}
+.mg-agent-todo-item[data-state="cancelled"] { color: var(--mg-text-3); }
+.mg-agent-todo-item[data-state="cancelled"] .mg-agent-todo-text { text-decoration: line-through; text-decoration-color: var(--mg-text-3); }
+.mg-agent-todo-item[data-state="cancelled"] .mg-agent-todo-mark { border-color: var(--mg-hairline-bold); }
+.mg-agent-todo .mg-agent-earlier { padding-left: 20px; }
+.mg-sr { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; }
+
+/* Approval: Hermes' own waiting approval, answered from here */
+.mg-agent-approval {
+  margin-top: var(--mg-s-4);
+  padding: var(--mg-s-3);
+  border: 1px solid var(--mg-hairline-strong);
+  border-radius: var(--mg-r-card);
+  background: var(--mg-surface);
+  animation: mg-agent-in var(--mg-dur-2) var(--mg-ease-out) both;
+}
+
+.mg-agent-approval-head { display: flex; align-items: center; gap: var(--mg-s-2); color: var(--mg-text); }
+.mg-agent-approval-head b { font-weight: 500; }
+.mg-agent-approval-head .codicon { font-size: 13px; color: var(--mg-text-3); }
+.mg-agent-approval p { margin: var(--mg-s-2) 0 0; color: var(--mg-text-3); line-height: 1.45; }
+.mg-agent-approval .mg-agent-error { color: var(--mg-text); }
+
+.mg-agent-approval pre {
+  margin: var(--mg-s-2) 0 0;
+  padding: var(--mg-s-2);
+  max-height: 120px;
+  overflow: auto;
+  border-radius: var(--mg-r-tag);
+  background: var(--mg-well);
+  color: var(--mg-text-2);
+  font-family: ui-monospace, "SF Mono", Menlo, monospace;
+  font-size: 12px;
+  white-space: pre-wrap;
+  word-break: break-all;
+}
+
+.mg-agent-actions { display: flex; justify-content: flex-end; gap: 6px; margin-top: var(--mg-s-3); }
+
+.mg-agent-button {
+  height: 28px;
+  padding: 0 12px;
+  border-radius: var(--mg-r-button);
+  background: transparent;
+  color: var(--mg-text-2);
+  font-size: var(--mg-fs-ui);
+  transition: background-color var(--mg-dur-1) var(--mg-ease-out), color var(--mg-dur-1) var(--mg-ease-out);
+}
+
+.mg-agent-button:hover { background: var(--mg-hover); color: var(--mg-text); }
+.mg-agent-button[data-mg-primary] { background: var(--mg-primary); color: var(--mg-on-primary); }
+.mg-agent-button[data-mg-primary]:hover { background: var(--mg-primary-hover); }
+.mg-agent-button:disabled { opacity: 0.6; }
+
+/* Arrival: once, on rows that are new when first drawn */
+.mg-agent-step[data-mg-new],
+.mg-agent-sub[data-mg-new] {
+  animation: mg-agent-in var(--mg-dur-2) var(--mg-ease-out) both;
+}
+
+@keyframes mg-agent-in {
+  from { opacity: 0; transform: translateY(4px); }
+  to { opacity: 1; transform: none; }
+}
+
+@keyframes mg-agent-breathe {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.35; }
+}
+
+@keyframes mg-agent-blink {
+  0%, 44%, 50%, 100% { transform: none; }
+  47% { transform: scaleY(0.15); }
+}
+
+/* Motion off and reduced motion: the one kill switch in 05-motion.css cuts
+   every animation and transition here to nothing (ended on its last frame),
+   the loops above included. Nothing here says it again. */

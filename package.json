@@ -1,0 +1,15 @@
+{
+  "name": "hermes-monograph",
+  "version": "0.2.0",
+  "private": true,
+  "type": "module",
+  "description": "Flat, monochrome redesign of the Hermes desktop app",
+  "license": "MIT",
+  "scripts": {
+    "build": "node build.mjs",
+    "release": "node build.mjs --release",
+    "install-local": "node build.mjs --install",
+    "doctor": "node scripts/doctor.mjs",
+    "test": "node --test \"test/*.test.mjs\""
+  }
+}

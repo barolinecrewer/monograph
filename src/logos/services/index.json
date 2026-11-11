@@ -1,0 +1,966 @@
+{
+ "//": "Service logos for tool rows (src/modules/00-services.js, src/css/34-services.css). mode \"mask\": a one-colour mark, drawn in its brand colour (lightened when too dark for the dark surface); \"image\": a multi-colour mark drawn as is. aliases: other spellings in tool or server names. hosts: for forUrl. Built by sanitising and optimising each source (scripts, event attributes, external references, raster images and metadata removed).",
+ "services": [
+  {
+   "id": "parallel",
+   "label": "Parallel",
+   "colour": "#1D1C1A",
+   "mode": "image",
+   "aliases": [
+    "parallelweb",
+    "parallelai"
+   ],
+   "hosts": [
+    "parallel.ai"
+   ],
+   "source": "https://parallel.ai/icon.svg",
+   "licence": "Trademark of its owner; the mark the vendor serves as its own site icon. Used to identify the service."
+  },
+  {
+   "id": "apify",
+   "label": "Apify",
+   "colour": "#246DFF",
+   "mode": "image",
+   "aliases": [],
+   "hosts": [
+    "apify.com"
+   ],
+   "source": "https://apify.com/icon0.svg",
+   "licence": "Trademark of its owner; the mark the vendor serves as its own site icon. Used to identify the service."
+  },
+  {
+   "id": "firecrawl",
+   "label": "Firecrawl",
+   "colour": "#FA5D19",
+   "mode": "image",
+   "aliases": [],
+   "hosts": [
+    "firecrawl.dev"
+   ],
+   "source": "https://logos.composio.dev/api/firecrawl",
+   "licence": "Trademark of its owner; the vendor mark from the logo service Hermes' own connectors UI uses (lib/connector-tools.ts connectorIconUrl). Used to identify the service."
+  },
+  {
+   "id": "cloudflare",
+   "label": "Cloudflare",
+   "colour": "#F38020",
+   "mode": "mask",
+   "aliases": [],
+   "hosts": [
+    "cloudflare.com",
+    "workers.dev",
+    "pages.dev"
+   ],
+   "source": "https://cdn.jsdelivr.net/npm/simple-icons@16.37.0/icons/cloudflare.svg",
+   "licence": "Simple Icons 16.37.0, CC0-1.0 (icon data); the mark is a trademark of its owner, guidelines https://www.cloudflare.com/trademark/. Upstream source: https://www.cloudflare.com/logo/"
+  },
+  {
+   "id": "typefully",
+   "label": "Typefully",
+   "colour": "#1DA1F2",
+   "mode": "mask",
+   "aliases": [],
+   "hosts": [
+    "typefully.com"
+   ],
+   "source": "https://typefully.com/icon/safari-pinned-tab.svg",
+   "licence": "Trademark of its owner; the mark the vendor serves as its own site icon. Used to identify the service."
+  },
+  {
+   "id": "notion",
+   "label": "Notion",
+   "colour": "#000000",
+   "mode": "mask",
+   "aliases": [],
+   "hosts": [
+    "notion.so",
+    "notion.com",
+    "notion.site"
+   ],
+   "source": "https://cdn.jsdelivr.net/npm/simple-icons@16.37.0/icons/notion.svg",
+   "licence": "Simple Icons 16.37.0, CC0-1.0 (icon data); the mark is a trademark of its owner. Upstream source: https://www.notion.so"
+  },
+  {
+   "id": "slack",
+   "label": "Slack",
+   "colour": "#4A154B",
+   "mode": "image",
+   "aliases": [],
+   "hosts": [
+    "slack.com"
+   ],
+   "source": "https://logos.composio.dev/api/slack",
+   "licence": "Trademark of its owner; the vendor mark from the logo service Hermes' own connectors UI uses (lib/connector-tools.ts connectorIconUrl). Used to identify the service."
+  },
+  {
+   "id": "supabase",
+   "label": "Supabase",
+   "colour": "#3FCF8E",
+   "mode": "mask",
+   "aliases": [],
+   "hosts": [
+    "supabase.com",
+    "supabase.co"
+   ],
+   "source": "https://cdn.jsdelivr.net/npm/simple-icons@16.37.0/icons/supabase.svg",
+   "licence": "Simple Icons 16.37.0, CC0-1.0 (icon data); the mark is a trademark of its owner. Upstream source: https://github.com/supabase/supabase/blob/4031a7549f5d46da7bc79c01d56be4177dc7c114/packages/common/assets/images/supabase-logo-wordmark--light.svg"
+  },
+  {
+   "id": "linear",
+   "label": "Linear",
+   "colour": "#5E6AD2",
+   "mode": "mask",
+   "aliases": [],
+   "hosts": [
+    "linear.app"
+   ],
+   "source": "https://cdn.jsdelivr.net/npm/simple-icons@16.37.0/icons/linear.svg",
+   "licence": "Simple Icons 16.37.0, CC0-1.0 (icon data); the mark is a trademark of its owner. Upstream source: https://linear.app"
+  },
+  {
+   "id": "airtable",
+   "label": "Airtable",
+   "colour": "#18BFFF",
+   "mode": "mask",
+   "aliases": [],
+   "hosts": [
+    "airtable.com"
+   ],
+   "source": "https://cdn.jsdelivr.net/npm/simple-icons@16.37.0/icons/airtable.svg",
+   "licence": "Simple Icons 16.37.0, CC0-1.0 (icon data); the mark is a trademark of its owner. Upstream source: https://airtable.com/newsroom"
+  },
+  {
+   "id": "jira",
+   "label": "Jira",
+   "colour": "#0052CC",
+   "mode": "mask",
+   "aliases": [],
+   "hosts": [],
+   "source": "https://cdn.jsdelivr.net/npm/simple-icons@16.37.0/icons/jira.svg",
+   "licence": "Simple Icons 16.37.0, CC0-1.0 (icon data); the mark is a trademark of its owner, guidelines https://atlassian.design/foundations/logos/. Upstream source: https://atlassian.design/resources/logo-library"
+  },
+  {
+   "id": "asana",
+   "label": "Asana",
+   "colour": "#F06A6A",
+   "mode": "mask",
+   "aliases": [],
+   "hosts": [
+    "asana.com"
+   ],
+   "source": "https://cdn.jsdelivr.net/npm/simple-icons@16.37.0/icons/asana.svg",
+   "licence": "Simple Icons 16.37.0, CC0-1.0 (icon data); the mark is a trademark of its owner, guidelines https://asana.com/brand. Upstream source: https://asana.com/brand"
+  },
+  {
+   "id": "shopify",
+   "label": "Shopify",
+   "colour": "#7AB55C",
+   "mode": "mask",
+   "aliases": [],
+   "hosts": [
+    "shopify.com",
+    "myshopify.com"
+   ],
+   "source": "https://cdn.jsdelivr.net/npm/simple-icons@16.37.0/icons/shopify.svg",
+   "licence": "Simple Icons 16.37.0, CC0-1.0 (icon data); the mark is a trademark of its owner, guidelines https://www.shopify.com/brand-assets. Upstream source: https://www.shopify.com/brand-assets"
+  },
+  {
+   "id": "discord",
+   "label": "Discord",
+   "colour": "#5865F2",
+   "mode": "mask",
+   "aliases": [
+    "discordbot",
+    "discordadmin"
+   ],
+   "hosts": [
+    "discord.com",
+    "discord.gg"
+   ],
+   "source": "https://cdn.jsdelivr.net/npm/simple-icons@16.37.0/icons/discord.svg",
+   "licence": "Simple Icons 16.37.0, CC0-1.0 (icon data); the mark is a trademark of its owner, guidelines https://discord.com/branding. Upstream source: https://discord.com/branding"
+  },
+  {
+   "id": "calendly",
+   "label": "Calendly",
+   "colour": "#006BFF",
+   "mode": "mask",
+   "aliases": [],
+   "hosts": [
+    "calendly.com"
+   ],
+   "source": "https://cdn.jsdelivr.net/npm/simple-icons@16.37.0/icons/calendly.svg",
+   "licence": "Simple Icons 16.37.0, CC0-1.0 (icon data); the mark is a trademark of its owner, guidelines https://calendly.com/newsroom. Upstream source: https://calendly.com/newsroom"
+  },
+  {
+   "id": "apollo",
+   "label": "Apollo",
+   "colour": "#767909",
+   "mode": "image",
+   "aliases": [
+    "apolloio"
+   ],
+   "hosts": [
+    "apollo.io"
+   ],
+   "source": "https://logos.composio.dev/api/apollo",
+   "licence": "Trademark of its owner; the vendor mark from the logo service Hermes' own connectors UI uses (lib/connector-tools.ts connectorIconUrl). Used to identify the service."
+  },
+  {
+   "id": "semrush",
+   "label": "Semrush",
+   "colour": "#FF642D",
+   "mode": "mask",
+   "aliases": [],
+   "hosts": [
+    "semrush.com"
+   ],
+   "source": "https://cdn.jsdelivr.net/npm/simple-icons@16.37.0/icons/semrush.svg",
+   "licence": "Simple Icons 16.37.0, CC0-1.0 (icon data); the mark is a trademark of its owner. Upstream source: https://www.semrush.com"
+  },
+  {
+   "id": "confluence",
+   "label": "Confluence",
+   "colour": "#172B4D",
+   "mode": "mask",
+   "aliases": [],
+   "hosts": [],
+   "source": "https://cdn.jsdelivr.net/npm/simple-icons@16.37.0/icons/confluence.svg",
+   "licence": "Simple Icons 16.37.0, CC0-1.0 (icon data); the mark is a trademark of its owner. Upstream source: https://www.atlassian.com/company/news/press-kit"
+  },
+  {
+   "id": "sendgrid",
+   "label": "SendGrid",
+   "colour": "#0D9BE3",
+   "mode": "image",
+   "aliases": [],
+   "hosts": [
+    "sendgrid.com"
+   ],
+   "source": "https://logos.composio.dev/api/sendgrid",
+   "licence": "Trademark of its owner; the vendor mark from the logo service Hermes' own connectors UI uses (lib/connector-tools.ts connectorIconUrl). Used to identify the service."
+  },
+  {
+   "id": "box",
+   "label": "Box",
+   "colour": "#0061D5",
+   "mode": "mask",
+   "aliases": [],
+   "hosts": [
+    "box.com"
+   ],
+   "source": "https://cdn.jsdelivr.net/npm/simple-icons@16.37.0/icons/box.svg",
+   "licence": "Simple Icons 16.37.0, CC0-1.0 (icon data); the mark is a trademark of its owner, guidelines https://www.box.com/en-gb/about-us/press. Upstream source: https://www.box.com/en-gb/about-us/press"
+  },
+  {
+   "id": "ashby",
+   "label": "Ashby",
+   "colour": "#2D21CD",
+   "mode": "image",
+   "aliases": [
+    "ashbyhq"
+   ],
+   "hosts": [
+    "ashbyhq.com"
+   ],
+   "source": "https://logos.composio.dev/api/ashby",
+   "licence": "Trademark of its owner; the vendor mark from the logo service Hermes' own connectors UI uses (lib/connector-tools.ts connectorIconUrl). Used to identify the service."
+  },
+  {
+   "id": "adobe",
+   "label": "Adobe",
+   "colour": "#FA0C00",
+   "mode": "mask",
+   "aliases": [],
+   "hosts": [
+    "adobe.com"
+   ],
+   "source": "https://logos.composio.dev/api/adobe",
+   "licence": "Trademark of its owner; the vendor mark from the logo service Hermes' own connectors UI uses (lib/connector-tools.ts connectorIconUrl). Used to identify the service."
+  },
+  {
+   "id": "ahrefs",
+   "label": "Ahrefs",
+   "colour": "#FF8D00",
+   "mode": "mask",
+   "aliases": [],
+   "hosts": [
+    "ahrefs.com"
+   ],
+   "source": "https://static.ahrefs.com/safari-pinned-tab.svg",
+   "licence": "Trademark of its owner; the mark the vendor serves as its own site icon. Used to identify the service."
+  },
+  {
+   "id": "amplitude",
+   "label": "Amplitude",
+   "colour": "#1E61F0",
+   "mode": "image",
+   "aliases": [],
+   "hosts": [
+    "amplitude.com"
+   ],
+   "source": "https://logos.composio.dev/api/amplitude",
+   "licence": "Trademark of its owner; the vendor mark from the logo service Hermes' own connectors UI uses (lib/connector-tools.ts connectorIconUrl). Used to identify the service."
+  },
+  {
+   "id": "betterstack",
+   "label": "Better Stack",
+   "colour": "#000000",
+   "mode": "mask",
+   "aliases": [],
+   "hosts": [
+    "betterstack.com"
+   ],
+   "source": "https://cdn.jsdelivr.net/npm/simple-icons@16.37.0/icons/betterstack.svg",
+   "licence": "Simple Icons 16.37.0, CC0-1.0 (icon data); the mark is a trademark of its owner. Upstream source: https://betterstack.com"
+  },
+  {
+   "id": "canva",
+   "label": "Canva",
+   "colour": "#00C4CC",
+   "mode": "image",
+   "aliases": [],
+   "hosts": [
+    "canva.com"
+   ],
+   "source": "https://logos.composio.dev/api/canva",
+   "licence": "Trademark of its owner; the vendor mark from the logo service Hermes' own connectors UI uses (lib/connector-tools.ts connectorIconUrl). Used to identify the service."
+  },
+  {
+   "id": "cashfree",
+   "label": "Cashfree Payments",
+   "colour": "#00ADA1",
+   "mode": "image",
+   "aliases": [],
+   "hosts": [
+    "cashfree.com"
+   ],
+   "source": "https://www.cashfree.com/favicon.svg",
+   "licence": "Trademark of its owner; the mark the vendor serves as its own site icon. Used to identify the service."
+  },
+  {
+   "id": "circleback",
+   "label": "Circleback",
+   "colour": "#F9A78E",
+   "mode": "image",
+   "aliases": [],
+   "hosts": [
+    "circleback.ai"
+   ],
+   "source": "https://logos.composio.dev/api/circleback_mcp",
+   "licence": "Trademark of its owner; the vendor mark from the logo service Hermes' own connectors UI uses (lib/connector-tools.ts connectorIconUrl). Used to identify the service."
+  },
+  {
+   "id": "clickhouse",
+   "label": "ClickHouse",
+   "colour": "#FFCC01",
+   "mode": "mask",
+   "aliases": [],
+   "hosts": [
+    "clickhouse.com"
+   ],
+   "source": "https://cdn.jsdelivr.net/npm/simple-icons@16.37.0/icons/clickhouse.svg",
+   "licence": "Simple Icons 16.37.0, CC0-1.0 (icon data); the mark is a trademark of its owner. Upstream source: https://github.com/ClickHouse/ClickHouse/blob/12bd453a43819176d25ecf247033f6cb1af54beb/website/images/logo-clickhouse.svg"
+  },
+  {
+   "id": "clickup",
+   "label": "ClickUp",
+   "colour": "#7B68EE",
+   "mode": "mask",
+   "aliases": [],
+   "hosts": [
+    "clickup.com"
+   ],
+   "source": "https://cdn.jsdelivr.net/npm/simple-icons@16.37.0/icons/clickup.svg",
+   "licence": "Simple Icons 16.37.0, CC0-1.0 (icon data); the mark is a trademark of its owner. Upstream source: https://clickup.com/brand"
+  },
+  {
+   "id": "coinbase",
+   "label": "Coinbase",
+   "colour": "#2962FF",
+   "mode": "image",
+   "aliases": [],
+   "hosts": [
+    "coinbase.com"
+   ],
+   "source": "https://logos.composio.dev/api/coinbase",
+   "licence": "Trademark of its owner; the vendor mark from the logo service Hermes' own connectors UI uses (lib/connector-tools.ts connectorIconUrl). Used to identify the service."
+  },
+  {
+   "id": "customerio",
+   "label": "Customer.io",
+   "colour": "#00262B",
+   "mode": "image",
+   "aliases": [],
+   "hosts": [
+    "customer.io"
+   ],
+   "source": "https://customer.io/favicon.svg",
+   "licence": "Trademark of its owner; the mark the vendor serves as its own site icon. Used to identify the service."
+  },
+  {
+   "id": "datadog",
+   "label": "Datadog",
+   "colour": "#632CA6",
+   "mode": "mask",
+   "aliases": [],
+   "hosts": [
+    "datadoghq.com"
+   ],
+   "source": "https://cdn.jsdelivr.net/npm/simple-icons@16.37.0/icons/datadog.svg",
+   "licence": "Simple Icons 16.37.0, CC0-1.0 (icon data); the mark is a trademark of its owner, guidelines https://www.datadoghq.com/about/resources/. Upstream source: https://www.datadoghq.com/about/resources"
+  },
+  {
+   "id": "granola",
+   "label": "Granola",
+   "colour": "#B2C248",
+   "mode": "image",
+   "aliases": [],
+   "hosts": [
+    "granola.ai"
+   ],
+   "source": "https://logos.composio.dev/api/granola_mcp",
+   "licence": "Trademark of its owner; the vendor mark from the logo service Hermes' own connectors UI uses (lib/connector-tools.ts connectorIconUrl). Used to identify the service."
+  },
+  {
+   "id": "greptile",
+   "label": "Greptile",
+   "colour": "#28E99F",
+   "mode": "mask",
+   "aliases": [],
+   "hosts": [
+    "greptile.com"
+   ],
+   "source": "https://logos.composio.dev/api/greptile",
+   "licence": "Trademark of its owner; the vendor mark from the logo service Hermes' own connectors UI uses (lib/connector-tools.ts connectorIconUrl). Used to identify the service."
+  },
+  {
+   "id": "higgsfield",
+   "label": "Higgsfield",
+   "colour": "#D1FE17",
+   "mode": "image",
+   "aliases": [],
+   "hosts": [
+    "higgsfield.ai"
+   ],
+   "source": "https://logos.composio.dev/api/higgsfield",
+   "licence": "Trademark of its owner; the vendor mark from the logo service Hermes' own connectors UI uses (lib/connector-tools.ts connectorIconUrl). Used to identify the service."
+  },
+  {
+   "id": "intercom",
+   "label": "Intercom",
+   "colour": "#6AFDEF",
+   "mode": "mask",
+   "aliases": [],
+   "hosts": [
+    "intercom.com"
+   ],
+   "source": "https://cdn.jsdelivr.net/npm/simple-icons@16.37.0/icons/intercom.svg",
+   "licence": "Simple Icons 16.37.0, CC0-1.0 (icon data); the mark is a trademark of its owner, guidelines https://www.intercom.com/press. Upstream source: https://www.intercom.com/press"
+  },
+  {
+   "id": "metabase",
+   "label": "Metabase",
+   "colour": "#509EE3",
+   "mode": "mask",
+   "aliases": [],
+   "hosts": [
+    "metabase.com"
+   ],
+   "source": "https://cdn.jsdelivr.net/npm/simple-icons@16.37.0/icons/metabase.svg",
+   "licence": "Simple Icons 16.37.0, CC0-1.0 (icon data); the mark is a trademark of its owner. Upstream source: https://www.metabase.com"
+  },
+  {
+   "id": "mintlify",
+   "label": "Mintlify",
+   "colour": "#18E299",
+   "mode": "mask",
+   "aliases": [],
+   "hosts": [
+    "mintlify.com"
+   ],
+   "source": "https://cdn.jsdelivr.net/npm/simple-icons@16.37.0/icons/mintlify.svg",
+   "licence": "Simple Icons 16.37.0, CC0-1.0 (icon data); the mark is a trademark of its owner. Upstream source: https://mintlify.com"
+  },
+  {
+   "id": "neon",
+   "label": "Neon",
+   "colour": "#34D59A",
+   "mode": "mask",
+   "aliases": [],
+   "hosts": [
+    "neon.tech",
+    "neon.com"
+   ],
+   "source": "https://cdn.jsdelivr.net/npm/simple-icons@16.37.0/icons/neon.svg",
+   "licence": "Simple Icons 16.37.0, CC0-1.0 (icon data); the mark is a trademark of its owner, guidelines https://neon.com/brand. Upstream source: https://neon.com/brand"
+  },
+  {
+   "id": "pandadoc",
+   "label": "PandaDoc",
+   "colour": "#92C2B3",
+   "mode": "image",
+   "aliases": [],
+   "hosts": [
+    "pandadoc.com"
+   ],
+   "source": "https://logos.composio.dev/api/pandadoc",
+   "licence": "Trademark of its owner; the vendor mark from the logo service Hermes' own connectors UI uses (lib/connector-tools.ts connectorIconUrl). Used to identify the service."
+  },
+  {
+   "id": "plaid",
+   "label": "Plaid",
+   "colour": "#111111",
+   "mode": "mask",
+   "aliases": [],
+   "hosts": [
+    "plaid.com"
+   ],
+   "source": "https://plaid.com/assets/img/favicons/safari-pinned-tab.svg",
+   "licence": "Trademark of its owner; the mark the vendor serves as its own site icon. Used to identify the service."
+  },
+  {
+   "id": "plain",
+   "label": "Plain",
+   "colour": "#1B8651",
+   "mode": "image",
+   "aliases": [],
+   "hosts": [
+    "plain.com"
+   ],
+   "source": "https://logos.composio.dev/api/plain",
+   "licence": "Trademark of its owner; the vendor mark from the logo service Hermes' own connectors UI uses (lib/connector-tools.ts connectorIconUrl). Used to identify the service."
+  },
+  {
+   "id": "posthog",
+   "label": "PostHog",
+   "colour": "#000000",
+   "mode": "mask",
+   "aliases": [],
+   "hosts": [
+    "posthog.com"
+   ],
+   "source": "https://cdn.jsdelivr.net/npm/simple-icons@16.37.0/icons/posthog.svg",
+   "licence": "Simple Icons 16.37.0, CC0-1.0 (icon data); the mark is a trademark of its owner, guidelines https://posthog.com/handbook/company/brand-assets. Upstream source: https://posthog.com/handbook/company/brand-assets"
+  },
+  {
+   "id": "pylon",
+   "label": "Pylon",
+   "colour": "#590FFF",
+   "mode": "image",
+   "aliases": [],
+   "hosts": [
+    "usepylon.com"
+   ],
+   "source": "https://logos.composio.dev/api/pylon_mcp",
+   "licence": "Trademark of its owner; the vendor mark from the logo service Hermes' own connectors UI uses (lib/connector-tools.ts connectorIconUrl). Used to identify the service."
+  },
+  {
+   "id": "railway",
+   "label": "Railway",
+   "colour": "#0B0D0E",
+   "mode": "mask",
+   "aliases": [],
+   "hosts": [
+    "railway.app",
+    "railway.com"
+   ],
+   "source": "https://cdn.jsdelivr.net/npm/simple-icons@16.37.0/icons/railway.svg",
+   "licence": "Simple Icons 16.37.0, CC0-1.0 (icon data); the mark is a trademark of its owner. Upstream source: https://railway.app"
+  },
+  {
+   "id": "ramp",
+   "label": "Ramp",
+   "colour": "#80871D",
+   "mode": "image",
+   "aliases": [],
+   "hosts": [
+    "ramp.com"
+   ],
+   "source": "https://logos.composio.dev/api/ramp",
+   "licence": "Trademark of its owner; the vendor mark from the logo service Hermes' own connectors UI uses (lib/connector-tools.ts connectorIconUrl). Used to identify the service."
+  },
+  {
+   "id": "resend",
+   "label": "Resend",
+   "colour": "#000000",
+   "mode": "mask",
+   "aliases": [],
+   "hosts": [
+    "resend.com"
+   ],
+   "source": "https://cdn.jsdelivr.net/npm/simple-icons@16.37.0/icons/resend.svg",
+   "licence": "Simple Icons 16.37.0, CC0-1.0 (icon data); the mark is a trademark of its owner, guidelines https://resend.com/brand. Upstream source: https://resend.com/brand"
+  },
+  {
+   "id": "sentry",
+   "label": "Sentry",
+   "colour": "#362D59",
+   "mode": "mask",
+   "aliases": [],
+   "hosts": [
+    "sentry.io"
+   ],
+   "source": "https://cdn.jsdelivr.net/npm/simple-icons@16.37.0/icons/sentry.svg",
+   "licence": "Simple Icons 16.37.0, CC0-1.0 (icon data); the mark is a trademark of its owner. Upstream source: https://sentry.io/branding/"
+  },
+  {
+   "id": "statsig",
+   "label": "Statsig",
+   "colour": "#343941",
+   "mode": "image",
+   "aliases": [],
+   "hosts": [
+    "statsig.com"
+   ],
+   "source": "https://statsig.com/images/favicons/favicon.svg",
+   "licence": "Trademark of its owner; the mark the vendor serves as its own site icon. Used to identify the service."
+  },
+  {
+   "id": "stripe",
+   "label": "Stripe",
+   "colour": "#635BFF",
+   "mode": "mask",
+   "aliases": [],
+   "hosts": [
+    "stripe.com"
+   ],
+   "source": "https://cdn.jsdelivr.net/npm/simple-icons@16.37.0/icons/stripe.svg",
+   "licence": "Simple Icons 16.37.0, CC0-1.0 (icon data); the mark is a trademark of its owner. Upstream source: https://stripe.com/newsroom/information"
+  },
+  {
+   "id": "todoist",
+   "label": "Todoist",
+   "colour": "#E44332",
+   "mode": "mask",
+   "aliases": [],
+   "hosts": [
+    "todoist.com"
+   ],
+   "source": "https://cdn.jsdelivr.net/npm/simple-icons@16.37.0/icons/todoist.svg",
+   "licence": "Simple Icons 16.37.0, CC0-1.0 (icon data); the mark is a trademark of its owner. Upstream source: https://doist.com/press"
+  },
+  {
+   "id": "turso",
+   "label": "Turso",
+   "colour": "#4FF8D2",
+   "mode": "mask",
+   "aliases": [],
+   "hosts": [
+    "turso.tech"
+   ],
+   "source": "https://cdn.jsdelivr.net/npm/simple-icons@16.37.0/icons/turso.svg",
+   "licence": "Simple Icons 16.37.0, CC0-1.0 (icon data); the mark is a trademark of its owner. Upstream source: https://turso.tech"
+  },
+  {
+   "id": "vercel",
+   "label": "Vercel",
+   "colour": "#000000",
+   "mode": "mask",
+   "aliases": [],
+   "hosts": [
+    "vercel.com",
+    "vercel.app"
+   ],
+   "source": "https://cdn.jsdelivr.net/npm/simple-icons@16.37.0/icons/vercel.svg",
+   "licence": "Simple Icons 16.37.0, CC0-1.0 (icon data); the mark is a trademark of its owner, guidelines https://vercel.com/geist/brands. Upstream source: https://vercel.com/geist/brands"
+  },
+  {
+   "id": "wisprflow",
+   "label": "Wispr Flow",
+   "colour": "#191919",
+   "mode": "image",
+   "aliases": [
+    "wispr"
+   ],
+   "hosts": [
+    "wisprflow.ai"
+   ],
+   "source": "https://logos.composio.dev/api/wispr_flow_mcp",
+   "licence": "Trademark of its owner; the vendor mark from the logo service Hermes' own connectors UI uses (lib/connector-tools.ts connectorIconUrl). Used to identify the service."
+  },
+  {
+   "id": "github",
+   "label": "GitHub",
+   "colour": "#181717",
+   "mode": "mask",
+   "aliases": [
+    "gh"
+   ],
+   "hosts": [
+    "github.com",
+    "githubusercontent.com",
+    "github.io"
+   ],
+   "source": "https://cdn.jsdelivr.net/npm/simple-icons@16.37.0/icons/github.svg",
+   "licence": "Simple Icons 16.37.0, CC0-1.0 (icon data); the mark is a trademark of its owner, guidelines https://github.com/logos. Upstream source: https://github.com/logos"
+  },
+  {
+   "id": "gmail",
+   "label": "Gmail",
+   "colour": "#EA4335",
+   "mode": "mask",
+   "aliases": [],
+   "hosts": [
+    "mail.google.com"
+   ],
+   "source": "https://cdn.jsdelivr.net/npm/simple-icons@16.37.0/icons/gmail.svg",
+   "licence": "Simple Icons 16.37.0, CC0-1.0 (icon data); the mark is a trademark of its owner. Upstream source: https://fonts.gstatic.com/s/i/productlogos/gmail_2020q4/v8/192px.svg"
+  },
+  {
+   "id": "googlecalendar",
+   "label": "Google Calendar",
+   "colour": "#4285F4",
+   "mode": "mask",
+   "aliases": [
+    "gcal"
+   ],
+   "hosts": [
+    "calendar.google.com"
+   ],
+   "source": "https://cdn.jsdelivr.net/npm/simple-icons@16.37.0/icons/googlecalendar.svg",
+   "licence": "Simple Icons 16.37.0, CC0-1.0 (icon data); the mark is a trademark of its owner. Upstream source: https://fonts.gstatic.com/s/i/productlogos/calendar_2020q4/v8/192px.svg"
+  },
+  {
+   "id": "googledrive",
+   "label": "Google Drive",
+   "colour": "#4285F4",
+   "mode": "mask",
+   "aliases": [
+    "gdrive"
+   ],
+   "hosts": [
+    "drive.google.com"
+   ],
+   "source": "https://cdn.jsdelivr.net/npm/simple-icons@16.37.0/icons/googledrive.svg",
+   "licence": "Simple Icons 16.37.0, CC0-1.0 (icon data); the mark is a trademark of its owner. Upstream source: https://developers.google.com/drive/web/branding"
+  },
+  {
+   "id": "googledocs",
+   "label": "Google Docs",
+   "colour": "#4285F4",
+   "mode": "mask",
+   "aliases": [],
+   "hosts": [
+    "docs.google.com"
+   ],
+   "source": "https://cdn.jsdelivr.net/npm/simple-icons@16.37.0/icons/googledocs.svg",
+   "licence": "Simple Icons 16.37.0, CC0-1.0 (icon data); the mark is a trademark of its owner. Upstream source: https://www.google.com/docs/about"
+  },
+  {
+   "id": "googlesheets",
+   "label": "Google Sheets",
+   "colour": "#34A853",
+   "mode": "mask",
+   "aliases": [
+    "gsheets"
+   ],
+   "hosts": [
+    "sheets.google.com"
+   ],
+   "source": "https://cdn.jsdelivr.net/npm/simple-icons@16.37.0/icons/googlesheets.svg",
+   "licence": "Simple Icons 16.37.0, CC0-1.0 (icon data); the mark is a trademark of its owner. Upstream source: https://sheets.google.com"
+  },
+  {
+   "id": "google",
+   "label": "Google",
+   "colour": "#4285F4",
+   "mode": "mask",
+   "aliases": [
+    "googleworkspace",
+    "gws",
+    "gmeet",
+    "googlemeet"
+   ],
+   "hosts": [
+    "google.com",
+    "googleapis.com"
+   ],
+   "source": "https://cdn.jsdelivr.net/npm/simple-icons@16.37.0/icons/google.svg",
+   "licence": "Simple Icons 16.37.0, CC0-1.0 (icon data); the mark is a trademark of its owner, guidelines https://about.google/brand-resource-center/brand-elements/. Upstream source: https://partnermarketinghub.withgoogle.com"
+  },
+  {
+   "id": "x",
+   "label": "X",
+   "colour": "#000000",
+   "mode": "mask",
+   "aliases": [
+    "twitter",
+    "xurl",
+    "xsearch"
+   ],
+   "hosts": [
+    "x.com",
+    "twitter.com",
+    "t.co"
+   ],
+   "source": "https://cdn.jsdelivr.net/npm/simple-icons@16.37.0/icons/x.svg",
+   "licence": "Simple Icons 16.37.0, CC0-1.0 (icon data); the mark is a trademark of its owner, guidelines https://about.x.com/en/who-we-are/brand-toolkit. Upstream source: https://x.com"
+  },
+  {
+   "id": "youtube",
+   "label": "YouTube",
+   "colour": "#FF0000",
+   "mode": "mask",
+   "aliases": [],
+   "hosts": [
+    "youtube.com",
+    "youtu.be"
+   ],
+   "source": "https://cdn.jsdelivr.net/npm/simple-icons@16.37.0/icons/youtube.svg",
+   "licence": "Simple Icons 16.37.0, CC0-1.0 (icon data); the mark is a trademark of its owner, guidelines https://www.youtube.com/howyoutubeworks/resources/brand-resources/#logos-icons-and-colors. Upstream source: https://www.youtube.com/howyoutubeworks/resources/brand-resources/#logos-icons-and-colors"
+  },
+  {
+   "id": "obsidian",
+   "label": "Obsidian",
+   "colour": "#7C3AED",
+   "mode": "mask",
+   "aliases": [],
+   "hosts": [
+    "obsidian.md"
+   ],
+   "source": "https://cdn.jsdelivr.net/npm/simple-icons@16.37.0/icons/obsidian.svg",
+   "licence": "Simple Icons 16.37.0, CC0-1.0 (icon data); the mark is a trademark of its owner, guidelines https://obsidian.md/brand. Upstream source: https://obsidian.md"
+  },
+  {
+   "id": "apple",
+   "label": "Apple",
+   "colour": "#000000",
+   "mode": "mask",
+   "aliases": [
+    "applenotes",
+    "applereminders",
+    "findmy",
+    "remindctl"
+   ],
+   "hosts": [
+    "apple.com",
+    "icloud.com"
+   ],
+   "source": "https://cdn.jsdelivr.net/npm/simple-icons@16.37.0/icons/apple.svg",
+   "licence": "Simple Icons 16.37.0, CC0-1.0 (icon data); the mark is a trademark of its owner. Upstream source: https://www.apple.com"
+  },
+  {
+   "id": "imessage",
+   "label": "iMessage",
+   "colour": "#34DA50",
+   "mode": "mask",
+   "aliases": [
+    "imsg"
+   ],
+   "hosts": [],
+   "source": "https://cdn.jsdelivr.net/npm/simple-icons@16.37.0/icons/imessage.svg",
+   "licence": "Simple Icons 16.37.0, CC0-1.0 (icon data); the mark is a trademark of its owner. Upstream source: https://commons.wikimedia.org/wiki/File:IMessage_logo.svg"
+  },
+  {
+   "id": "telegram",
+   "label": "Telegram",
+   "colour": "#26A5E4",
+   "mode": "mask",
+   "aliases": [],
+   "hosts": [
+    "telegram.org",
+    "t.me"
+   ],
+   "source": "https://cdn.jsdelivr.net/npm/simple-icons@16.37.0/icons/telegram.svg",
+   "licence": "Simple Icons 16.37.0, CC0-1.0 (icon data); the mark is a trademark of its owner. Upstream source: https://telegram.org/tour/screenshots"
+  },
+  {
+   "id": "1password",
+   "label": "1Password",
+   "colour": "#145FE4",
+   "mode": "mask",
+   "aliases": [
+    "onepassword"
+   ],
+   "hosts": [
+    "1password.com"
+   ],
+   "source": "https://cdn.jsdelivr.net/npm/simple-icons@16.37.0/icons/1password.svg",
+   "licence": "Simple Icons 16.37.0, CC0-1.0 (icon data); the mark is a trademark of its owner, guidelines https://1password.com/press. Upstream source: https://1password.com/press"
+  },
+  {
+   "id": "arxiv",
+   "label": "arXiv",
+   "colour": "#B31B1B",
+   "mode": "mask",
+   "aliases": [],
+   "hosts": [
+    "arxiv.org"
+   ],
+   "source": "https://cdn.jsdelivr.net/npm/simple-icons@16.37.0/icons/arxiv.svg",
+   "licence": "Simple Icons 16.37.0, CC0-1.0 (icon data); the mark is a trademark of its owner, guidelines https://arxiv.org/about/brand. Upstream source: https://arxiv.org"
+  },
+  {
+   "id": "openstreetmap",
+   "label": "OpenStreetMap",
+   "colour": "#7EBC6F",
+   "mode": "mask",
+   "aliases": [
+    "osm",
+    "osrm",
+    "nominatim"
+   ],
+   "hosts": [
+    "openstreetmap.org"
+   ],
+   "source": "https://cdn.jsdelivr.net/npm/simple-icons@16.37.0/icons/openstreetmap.svg",
+   "licence": "Simple Icons 16.37.0, CC0-1.0 (icon data); the mark is a trademark of its owner, guidelines https://wiki.osmfoundation.org/wiki/Trademark_Policy. Upstream source: https://www.openstreetmap.org"
+  },
+  {
+   "id": "anthropic",
+   "label": "Anthropic",
+   "colour": "#191919",
+   "mode": "mask",
+   "aliases": [],
+   "hosts": [
+    "anthropic.com"
+   ],
+   "source": "https://cdn.jsdelivr.net/npm/simple-icons@16.37.0/icons/anthropic.svg",
+   "licence": "Simple Icons 16.37.0, CC0-1.0 (icon data); the mark is a trademark of its owner. Upstream source: https://www.anthropic.com"
+  },
+  {
+   "id": "claude",
+   "label": "Claude",
+   "colour": "#D97757",
+   "mode": "mask",
+   "aliases": [
+    "claudecode"
+   ],
+   "hosts": [
+    "claude.ai",
+    "claude.com"
+   ],
+   "source": "https://cdn.jsdelivr.net/npm/simple-icons@16.37.0/icons/claude.svg",
+   "licence": "Simple Icons 16.37.0, CC0-1.0 (icon data); the mark is a trademark of its owner. Upstream source: https://claude.ai"
+  },
+  {
+   "id": "openai",
+   "label": "OpenAI",
+   "colour": "#000000",
+   "mode": "mask",
+   "aliases": [
+    "codex",
+    "chatgpt"
+   ],
+   "hosts": [
+    "openai.com",
+    "chatgpt.com"
+   ],
+   "source": "https://www.npmjs.com/package/@lobehub/icons-static-svg (already in src/logos, 1.102.0)",
+   "licence": "@lobehub/icons-static-svg, MIT; the mark is a trademark of its owner"
+  },
+  {
+   "id": "mem0",
+   "label": "Mem0",
+   "colour": "#CBB2FF",
+   "mode": "image",
+   "aliases": [],
+   "hosts": [
+    "mem0.ai"
+   ],
+   "source": "https://mem0.ai (site icon, framerusercontent.com/images/2ys67ADJdvcyGmQnhp8vKWSq8.svg)",
+   "licence": "Trademark of its owner; the mark the vendor serves as its own site icon. Used to identify the service."
+  }
+ ]
+}

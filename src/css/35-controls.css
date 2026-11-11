@@ -1,0 +1,124 @@
+/* Buttons: three weights. A white fill for the one primary action, a hairline
+   box for the secondary, bare text for everything else. */
+button[data-variant]:not([data-size^="icon"], [data-size="inline"], [data-size="micro"], [data-size="grip"]) {
+  border-radius: var(--mg-r-button) !important;
+}
+button:is([data-variant="default"], [data-variant="secondary"], [data-variant="outline"]) {
+  /* No box-shadow here: the focus ring is a box-shadow and appears at once. */
+  transition: background-color var(--mg-dur-1) var(--mg-ease-out), color var(--mg-dur-1) var(--mg-ease-out),
+    transform var(--mg-dur-1) var(--mg-ease-out) !important;
+}
+button:is([data-variant="default"], [data-variant="secondary"], [data-variant="outline"]):not(:disabled):active {
+  transform: scale(var(--mg-press-scale));
+}
+button[data-variant="default"] {
+  background-color: var(--mg-primary) !important;
+  color: var(--mg-on-primary) !important;
+  box-shadow: none !important;
+}
+button[data-variant="default"]:not(:disabled):hover { background-color: var(--mg-primary-hover) !important; }
+button[data-variant="secondary"] {
+  background-color: var(--mg-raised) !important;
+  color: var(--mg-text) !important;
+  box-shadow: inset 0 0 0 1px var(--mg-hairline-strong) !important;
+}
+button[data-variant="secondary"]:not(:disabled):hover { background-color: var(--mg-raised-2) !important; }
+button[data-variant="outline"] { box-shadow: inset 0 0 0 1px var(--mg-hairline-strong) !important; }
+button[data-variant="outline"]:not(:disabled):hover { box-shadow: inset 0 0 0 1px var(--mg-hairline-bold) !important; }
+
+/* Focus: the browser draws keyboard focus in the system accent (orange or
+   blue, per the Mac's setting). Chrome is grayscale, so the ring keeps its
+   shape and takes the second text step. Zero specificity: any focus style a
+   control sets for itself still wins. */
+:where(:focus-visible) { outline-color: var(--mg-text-2); }
+/* Hermes' own focus cue is a ring (box-shadow) in --ring at half strength,
+   and on fields a border in --dt-composer-ring: both too faint to find on a
+   dark field. The ring takes the second text step at full strength (well over
+   3:1 on every surface), on every button, row, switch and field. */
+:where(button, a, input, textarea, select, [role], [tabindex]):focus-visible { --tw-ring-color: var(--mg-text-2) !important; }
+/* Many of Hermes' controls hide the outline on focus and rely on a faint
+   ring or none at all (sidebar rows, nav rows, fields in a group): the Tab
+   walk (rig a11y y9) found no cue on most stops. Every control keyboard focus
+   lands on gets one gray outline, set off the control so it reads against
+   the surface around it. The reply head draws its own line (33-turns.css).
+   `html :is()` outranks Hermes' important `outline-hidden` utilities. */
+html :is(button, a[href], input, textarea, select, [role="switch"], [role="tab"], [role="radio"], [role="checkbox"], [tabindex]:not([data-mg-head])):focus-visible:not(:is([role="menu"], [role="listbox"], [role="dialog"], [role^="menuitem"], [role="option"])) {
+  outline: 2px solid var(--mg-text-2) !important;
+  outline-offset: 1px !important;
+}
+/* Not a popup, and not its rows. A menu takes focus by script when it opens,
+   and each row as the pointer crosses it; once anything has been typed the
+   browser counts that as keyboard focus, so the outline landed on the menu
+   box and on the row under the pointer, for a reader who never left the
+   mouse. None of them is a Tab stop, and a row already has its cue: the fill
+   of the highlighted row. */
+html :is([role="menu"], [role="listbox"], [role="dialog"], [role^="menuitem"], [role="option"]):focus-visible { outline: none !important; }
+/* Sidebar rows sit in clipping lists: the outline goes inside the row. */
+html [data-slot="sidebar"] :is(button, a[href], input, [tabindex]):focus-visible { outline-offset: -2px !important; }
+.desktop-input-chrome:is(:focus, :focus-within) { border-color: var(--mg-text-2) !important; }
+
+/* Hermes' running-text shimmer (tw-shimmer) draws the letters in a veil of
+   their own colour, at a fifth of its alpha in the light variant (the rig
+   without a skin), so "Running rm -rf …" on an approval was near invisible
+   between sweeps. At its dimmest the text is the third step (4.5:1 and up on
+   every surface); the sweep still brightens it. */
+.shimmer:not(.shimmer-bg) { --_fg: var(--mg-text-3) !important; }
+
+/* Meaning without colour: each state below used to be told by a hue (red,
+   green, amber) that is now a gray. Each is told by shape, weight or a glyph.
+   A destructive action: a bordered button in the text colour (the primary is
+   a white fill, the secondary a hairline box), heavier type. */
+button[data-variant="destructive"] {
+  background-color: transparent !important;
+  color: var(--mg-text) !important;
+  box-shadow: inset 0 0 0 1.5px var(--mg-text) !important;
+  font-weight: 600 !important;
+}
+button[data-variant="destructive"]:not(:disabled):hover { background-color: var(--mg-active) !important; }
+/* A field left empty or wrong: a dashed edge in the text colour. */
+:is(input, textarea, button, [data-slot="input-group"]):is([aria-invalid="true"], :has(> [aria-invalid="true"])) {
+  border: 1px dashed var(--mg-text) !important;
+}
+/* A failed tool row: Hermes puts an alert glyph before the title; the title
+   itself is set heavier than a row that worked. */
+[data-slot="tool-block"] .text-destructive { font-weight: 600; }
+/* A turn's duration leads with an emoji stopwatch, drawn in colour. */
+[data-slot="aui_turn-duration"] { filter: grayscale(1); }
+/* Code blocks and diffs: syntax in steps of gray. shiki writes each token's
+   colour inline: code blocks as `light-dark(<light>, <dark>)` with the hex of
+   github-light-default and github-dark-dimmed, diff rows (diff-lines.tsx) as a
+   React style, so `rgb(…)` of the theme in use. Each colour is one role in
+   both themes, so a role is matched by its colours, no script per token:
+   comments are the dimmest text step and italic, strings and numbers the
+   second, keywords (weight 500) and the names of things the first. Plain text
+   and punctuation share the theme's foreground (github gives punctuation no
+   colour of its own), so they stay on the first step. Anything else with a
+   colour (a theme's rare scopes) falls back to the first step: no chroma. */
+.shiki span, [data-slot="file-diff-panel"] span[style*="color"] { color: var(--mg-text) !important; }
+/* comments */
+:is(.shiki, [data-slot="file-diff-panel"]) span:is([style*="#768390" i], [style*="#6e7781" i], [style*="#57606a" i], [style*="rgb(118, 131, 144)"], [style*="rgb(110, 119, 129)"], [style*="rgb(87, 96, 106)"]) { color: var(--mg-text-3) !important; font-style: italic; }
+/* keywords and storage */
+:is(.shiki, [data-slot="file-diff-panel"]) span:is([style*="#f47067" i], [style*="#cf222e" i], [style*="rgb(244, 112, 103)"], [style*="rgb(207, 34, 46)"]) { color: var(--mg-text) !important; font-weight: 500; }
+/* constants, numbers, support, properties */
+:is(.shiki, [data-slot="file-diff-panel"]) span:is([style*="#6cb6ff" i], [style*="#0550ae" i], [style*="rgb(108, 182, 255)"], [style*="rgb(5, 80, 174)"]) { color: var(--mg-text-2) !important; }
+/* strings and regular expressions */
+:is(.shiki, [data-slot="file-diff-panel"]) span:is([style*="#96d0ff" i], [style*="#0a3069" i], [style*="rgb(150, 208, 255)"], [style*="rgb(10, 48, 105)"]) { color: var(--mg-text-2) !important; }
+/* names defined: variables, functions, tags, keys */
+:is(.shiki, [data-slot="file-diff-panel"]) span:is([style*="#f69d50" i], [style*="#953800" i], [style*="#dcbdfb" i], [style*="#8250df" i], [style*="#8ddb8c" i], [style*="#116329" i], [style*="rgb(246, 157, 80)"], [style*="rgb(149, 56, 0)"], [style*="rgb(220, 189, 251)"], [style*="rgb(130, 80, 223)"], [style*="rgb(141, 219, 140)"], [style*="rgb(17, 99, 41)"]) { color: var(--mg-text) !important; }
+/* Hermes dims the dark palette with a filter, which would lower every step
+   above under its measured contrast. */
+.shiki { filter: none !important; }
+
+/* Diff rows: added and removed lines read apart without colour. Each row gets
+   a gutter mark (+, a true minus, or a space for context), and the two kinds
+   take different fills (00-tokens.css: --ui-diff-*) and edges: added a solid
+   light edge on a lighter fill, removed a dashed edge on a darker one. Text
+   is never struck through. Rows are the whitespace-pre spans diff-lines.tsx
+   draws (token spans inside them carry no class). */
+[data-slot="file-diff-panel"] span[class~="whitespace-pre"]::before {
+  content: "\00a0"; display: inline-block; width: 1.6ch; margin-left: -0.4ch;
+  color: var(--mg-text-2); font-weight: 600; user-select: none;
+}
+[data-slot="file-diff-panel"] span[class~="whitespace-pre"][class*="ui-diff-add-background"]::before { content: "+"; color: var(--mg-text); }
+[data-slot="file-diff-panel"] span[class~="whitespace-pre"][class*="ui-diff-remove-background"]::before { content: "\2212"; }
+[data-slot="file-diff-panel"] span[class~="whitespace-pre"][class*="ui-diff-remove-border"] { border-left-style: dashed !important; }
