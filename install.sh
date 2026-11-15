@@ -4,6 +4,11 @@
 #   ./install.sh               build a release and install the plugin and the skin
 #   ./install.sh --local       build with config.local.json (your defaults and add-ons)
 #   ./install.sh --no-skin     install the plugin only
+#   ./install.sh --full        the complete look: Monograph with its add-ons, the
+#                              companion plugins in extras/ (bot mascots, bot
+#                              panel, model icons, live status, context ring,
+#                              image cards, live titles), and the settings
+#                              (skin on, tool calls hidden)
 #   ./install.sh --uninstall   put back what was there before Monograph
 #   ./install.sh --help
 #
@@ -16,8 +21,9 @@
 #   installed/  a copy of what was installed last, to tell later edits apart
 #   previous/   the version the last update replaced
 #
-# Safe to run again: a file that would not change is left alone. It never
-# edits Hermes' config; it prints the one command that turns the skin on.
+# Safe to run again: a file that would not change is left alone. Without
+# --full it never edits Hermes' config; it prints the one command that turns
+# the skin on.
 set -eu
 
 repo=$(cd "$(dirname "$0")" && pwd)
@@ -28,12 +34,14 @@ stamp=$(date +%Y%m%d-%H%M%S)
 mode=install
 build=release
 skin=yes
+full=no
 
 for arg in "$@"; do
   case "$arg" in
     --uninstall) mode=uninstall ;;
     --local) build=local ;;
     --no-skin) skin=no ;;
+    --full) full=yes ;;
     -h | --help)
       awk 'NR > 1 && /^#/ { sub(/^# ?/, ""); print; next } NR > 1 { exit }' "$0"
       exit 0
@@ -72,7 +80,10 @@ if [ "$mode" = uninstall ]; then
 
   say "Uninstalling Monograph from $home"
 
-  for rel in "$PLUGIN_REL" "$SKIN_REL"; do
+  # Every file this installer put in place (Monograph, skin, extras).
+  rels=$( { [ -d "$state/installed" ] && (cd "$state/installed" && find . -type f | sed 's|^\./||'); printf '%s\n%s\n' "$PLUGIN_REL" "$SKIN_REL"; } | sort -u)
+  printf '%s\n' "$rels" | while IFS= read -r rel; do
+    [ -n "$rel" ] || continue
     dst="$home/$rel"
 
     # A file changed by hand since the install is kept, not lost.
@@ -138,7 +149,12 @@ mkdir -p "$stage/scripts"
 cp "$repo/scripts/doctor.mjs" "$stage/scripts/"
 cp "$repo/selectors.json" "$stage/"
 
-if [ "$build" = local ]; then
+if [ "$full" = yes ]; then
+  # The add-ons that style the companion plugins.
+  printf '{ "addons": ["bots", "owner-rows"] }\n' > "$stage/config.local.json"
+  flag=""
+  build=full
+elif [ "$build" = local ]; then
   [ -f "$repo/config.local.json" ] || fail "--local needs config.local.json in $repo. Nothing was changed."
   cp "$repo/config.local.json" "$stage/"
   flag=""
@@ -223,6 +239,29 @@ install_file "$stage/dist/plugin.js" "$PLUGIN_REL"
 
 if [ "$skin" = yes ]; then
   install_file "$stage/skin/monograph.yaml" "$SKIN_REL"
+fi
+
+if [ "$full" = yes ]; then
+  [ -d "$repo/extras" ] || fail "--full needs extras/ in $repo."
+  (cd "$repo/extras" && find . -type f | sed 's|^\./||' | sort) > "$stage/extras.list"
+  while IFS= read -r rel; do
+    install_file "$repo/extras/$rel" "$rel"
+  done < "$stage/extras.list"
+
+  say ""
+  say "Settings"
+  if command -v hermes > /dev/null 2>&1; then
+    for py in live-status session-model-icons live-retitle; do
+      if hermes plugins enable "$py" > /dev/null 2>&1; then say "  enabled   plugin $py"; else say "  could not enable plugin $py: run  hermes plugins enable $py"; fi
+    done
+    hermes config set display.skin monograph > /dev/null 2>&1 && say "  set       display.skin monograph"
+    hermes config set display.tool_progress false > /dev/null 2>&1 && say "  set       display.tool_progress false  (tool calls hidden)"
+    say "  Restart Hermes once so the Python plugins load."
+  else
+    say "  hermes is not on PATH. Run these yourself, then restart Hermes:"
+    say "    hermes plugins enable live-status && hermes plugins enable session-model-icons && hermes plugins enable live-retitle"
+    say "    hermes config set display.skin monograph && hermes config set display.tool_progress false"
+  fi
 fi
 
 # ── Doctor ──────────────────────────────────────────────────────────────────

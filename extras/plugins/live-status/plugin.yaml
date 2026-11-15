@@ -1,0 +1,3 @@
+name: live-status
+version: 0.1.0
+description: "One short Haiku-written sentence describing what the agent is doing (and any errors), for the desktop's live status line."

@@ -1,0 +1,4 @@
+/* Private add-on: the owner's own sidebar plugin draws a model mark in the
+   same row slot. Beside it, Monograph's mark (20-sidebar.css) stands down, so
+   a row never shows two. */
+[data-slot="sidebar"] .row-hover:has([data-model-icon]) .mg-row-model { display: none; }

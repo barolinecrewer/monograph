@@ -1,0 +1,3 @@
+name: session-model-icons
+version: 0.2.0
+description: "Sidebar: model logo per session and a preview of the last assistant reply (backend API)."

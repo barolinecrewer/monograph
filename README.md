@@ -30,9 +30,15 @@ grayscale chrome. Colour appears only in model and service logos.
 ```sh
 git clone https://github.com/machina-exm/monograph.git
 cd monograph
-./install.sh
-hermes config set display.skin monograph   # turns on the colours
+./install.sh --full
 ```
+
+`--full` installs the complete look: Monograph with its add-ons, the companion
+plugins in `extras/` (bot mascots, bot panel, model icons and reply previews,
+the one-line live status, context ring, image cards, live titles), turns the
+skin on and hides tool calls. Restart Hermes once afterwards so the Python
+plugins load. Plain `./install.sh` installs Monograph alone and changes no
+settings; then turn the colours on with `hermes config set display.skin monograph`.
 
 `install.sh` builds a release of the plugin from the sources (in a temporary
 folder; your checkout is not touched), then copies:

@@ -1,0 +1,13 @@
+{
+  "name": "session-model-icons",
+  "label": "Session Model Icons",
+  "description": "Sidebar model logos + last-reply previews",
+  "icon": "Star",
+  "version": "0.2.0",
+  "tab": {
+    "path": "/session-model-icons",
+    "hidden": true
+  },
+  "entry": "dist/index.js",
+  "api": "plugin_api.py"
+}

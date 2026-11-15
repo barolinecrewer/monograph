@@ -1,0 +1,3 @@
+name: live-retitle
+version: 0.1.0
+description: "Re-titles sessions as the work evolves (after user turns 3, 6, 10, 15, then every 10). Never overrides a name you set by hand."

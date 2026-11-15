@@ -1,0 +1,142 @@
+/* Bots add-on (private): the bloub mascots are the identity of this view.
+   Everything around them is flat field and hairline; the mascots keep their
+   colour and are the only thing that moves. */
+
+/* A mascot is redrawn by replacing its nodes, up to seven times a second while
+   a turn runs, and a click only exists if the pressed node is still there at
+   release: a press on a mascot was a lost click, and the lead bot's tile is
+   mostly mascot. The pointer goes through to whatever holds the mascot (tile,
+   row, button), which stays put. The mascot engine listens for nothing on the
+   mascot itself, so nothing is lost. rig: suite bots. */
+svg[data-bloub] { pointer-events: none !important; }
+
+/* ── Roster ── */
+[data-bb-hero-src] { display: none !important; }
+/* Lead bot: the big mascot over its name, on the sidebar's own surface like
+   the bots under it. No tile: hover lifts the face, and the name takes the
+   full text colour on hover and while it is the open bot. */
+#bb-hero {
+  display: flex; flex-direction: column; align-items: center; gap: 10px;
+  width: calc(100% - 16px); margin: 10px 8px 8px; padding: 14px 0 16px;
+  background: transparent; border: 0;
+  border-radius: var(--mg-r-card) !important;
+}
+#bb-hero .bb-hero-face { display: grid; place-items: center; width: 76px; height: 76px; transition: transform var(--mg-dur-3) var(--mg-ease-spring); }
+#bb-hero:hover .bb-hero-face { transform: translateY(-2px) scale(1.05); }
+#bb-hero:active .bb-hero-face { transform: scale(.96); transition-duration: var(--mg-dur-1); }
+#bb-hero .bb-hero-name { font-size: var(--mg-fs-ui); font-weight: 500; color: var(--mg-text-2); transition: color var(--mg-dur-1) var(--mg-ease-out); }
+#bb-hero:hover .bb-hero-name, #bb-hero[data-active] .bb-hero-name { color: var(--mg-text); }
+[data-bb-roster-head] { position: absolute !important; height: 0 !important; overflow: visible !important; padding: 0 !important; margin: 0 !important; opacity: 0; pointer-events: none; }
+button[data-bb-anchor] { position: fixed !important; width: 180px !important; height: 1px !important; min-width: 0 !important; padding: 0 !important; }
+[data-bb-roster-head] button { width: 28px !important; height: 28px !important; border-radius: var(--mg-r-button) !important; background: var(--mg-raised) !important; color: var(--mg-text-2) !important; }
+[data-bb-roster-head] button:hover { background: var(--mg-raised-2) !important; color: var(--mg-text) !important; }
+[data-bb-roster-head] > div { gap: 8px !important; }
+/* Bot rows: mascot, name, status line. Same fills as session rows. The mascot
+   is the row's subject, so it is drawn larger than Hermes gives it (34px):
+   --mg-bot-face, one value. The mascot engine writes 34px on its wrap and on
+   the drawing; the drawing has a viewBox, so the size is set here and it
+   scales. The wrap is a block, not an inline box: inline, the line's descender
+   made the face cell 5px taller than the face. */
+[data-slot="bots-roster"] { --mg-bot-face: 46px; }
+[data-slot="bots-roster"] > .grid { padding-left: 8px !important; padding-right: 8px !important; }
+[data-roster-key] {
+  padding-top: 8px !important; padding-bottom: 8px !important; gap: 13px !important;
+  border-radius: var(--mg-r-button) !important;
+  transition: background-color var(--mg-dur-1) var(--mg-ease-out) !important;
+}
+[data-roster-key] [data-bloub-wrap] { display: grid !important; width: var(--mg-bot-face) !important; height: var(--mg-bot-face) !important; transition: transform var(--mg-dur-3) var(--mg-ease-spring); }
+[data-roster-key] [data-bloub-wrap] > svg[data-bloub] { width: 100%; height: 100%; }
+[data-roster-key]:hover [data-bloub-wrap] { transform: scale(1.08); }
+[data-roster-key]:active [data-bloub-wrap] { transform: scale(.94); transition-duration: var(--mg-dur-1); }
+[data-roster-key] .truncate.font-medium { font-size: 14px !important; color: var(--mg-text); }
+[data-roster-key] .truncate:not(.font-medium) { font-size: 12.5px !important; }
+[data-roster-key] span.grid.shrink-0[class*="size-3.5"] { display: none !important; }
+[data-slot="bots-section-heading"], [data-slot="bots-section-heading"] :is(span, div, button, h2, h3, p, a, i) { text-transform: none !important; letter-spacing: 0 !important; }
+
+/* ── A bot at work ──
+   A soft light travels round the edge of the bot's row (round the tile, for
+   the lead bot), the way a working session's title shimmers in the sessions
+   list. Hermes says which bot works, in the row itself: the face's mood (work,
+   think) or the running dot of the bot's chat (kept in the page, not drawn).
+   The light is a mask on one generated box per working bot: an SVG outline of
+   the box whose dash runs along it at one speed, tail fading. The box is the
+   text colour, so it follows the theme. Motion off or reduced: a still, faint
+   outline instead. */
+[data-roster-key]:has([data-hb-mood="work"], [data-hb-mood="think"], [role="status"][aria-label="Session running"]),
+[data-slot="bots-roster"]:has([data-bb-hero-src] :is([data-hb-mood="work"], [data-hb-mood="think"], [role="status"][aria-label="Session running"])) #bb-hero { position: relative; --mg-orbit-on: ""; }
+[data-roster-key] { --mg-orbit-mask: url("data:image/svg+xml,%3Csvg%20xmlns='http://www.w3.org/2000/svg'%3E%3Cstyle%3E%40keyframes%20o%7Bto%7Bstroke-dashoffset:-100%7D%7Drect%7Bx:.5px;y:.5px;width:calc(100%25%20-%201px);height:calc(100%25%20-%201px);rx:7.5px;fill:none;stroke:%23000;stroke-opacity:.11;animation:o%203.4s%20linear%20infinite%7D%3C/style%3E%3Crect%20pathLength='100'%20stroke-dasharray='0%200%2036%2064'/%3E%3Crect%20pathLength='100'%20stroke-dasharray='0%204.9%2030.5%2064.6'/%3E%3Crect%20pathLength='100'%20stroke-dasharray='0%209.7%2025.2%2065.1'/%3E%3Crect%20pathLength='100'%20stroke-dasharray='0%2014.2%2020.1%2065.7'/%3E%3Crect%20pathLength='100'%20stroke-dasharray='0%2018.5%2015.2%2066.3'/%3E%3Crect%20pathLength='100'%20stroke-dasharray='0%2022.6%2010.5%2066.9'/%3E%3Crect%20pathLength='100'%20stroke-dasharray='0%2026.3%206.3%2067.4'/%3E%3Crect%20pathLength='100'%20stroke-dasharray='0%2029.6%202.4%2068'/%3E%3C/svg%3E"); }
+#bb-hero { --mg-orbit-mask: url("data:image/svg+xml,%3Csvg%20xmlns='http://www.w3.org/2000/svg'%3E%3Cstyle%3E%40keyframes%20o%7Bto%7Bstroke-dashoffset:-100%7D%7Drect%7Bx:.5px;y:.5px;width:calc(100%25%20-%201px);height:calc(100%25%20-%201px);rx:10.5px;fill:none;stroke:%23000;stroke-opacity:.11;animation:o%203.4s%20linear%20infinite%7D%3C/style%3E%3Crect%20pathLength='100'%20stroke-dasharray='0%200%2036%2064'/%3E%3Crect%20pathLength='100'%20stroke-dasharray='0%204.9%2030.5%2064.6'/%3E%3Crect%20pathLength='100'%20stroke-dasharray='0%209.7%2025.2%2065.1'/%3E%3Crect%20pathLength='100'%20stroke-dasharray='0%2014.2%2020.1%2065.7'/%3E%3Crect%20pathLength='100'%20stroke-dasharray='0%2018.5%2015.2%2066.3'/%3E%3Crect%20pathLength='100'%20stroke-dasharray='0%2022.6%2010.5%2066.9'/%3E%3Crect%20pathLength='100'%20stroke-dasharray='0%2026.3%206.3%2067.4'/%3E%3Crect%20pathLength='100'%20stroke-dasharray='0%2029.6%202.4%2068'/%3E%3C/svg%3E"); }
+:is([data-roster-key], #bb-hero)::after {
+  content: var(--mg-orbit-on, none); position: absolute; inset: 0; border-radius: inherit; pointer-events: none;
+  background: var(--mg-text);
+  -webkit-mask: var(--mg-orbit-mask) 0 0 / 100% 100% no-repeat; mask: var(--mg-orbit-mask) 0 0 / 100% 100% no-repeat;
+}
+:root[data-mg-motion="off"] :is([data-roster-key], #bb-hero)::after { -webkit-mask: none; mask: none; background: none; box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--mg-text) 20%, transparent); }
+@media (prefers-reduced-motion: reduce) {
+  :is([data-roster-key], #bb-hero)::after { -webkit-mask: none; mask: none; background: none; box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--mg-text) 20%, transparent); }
+}
+
+/* ── Mascot picker ── */
+[data-bb-native="hidden"] { display: none !important; }
+#bb-picker { display: grid; justify-items: center; gap: 12px; padding: 2px 0 4px; }
+#bb-picker .bb-shapes { display: grid; grid-template-columns: repeat(8, 40px); gap: 4px; }
+#bb-picker .bb-shape { width: 40px; height: 40px; border-radius: var(--mg-r-button) !important; display: grid; place-items: center; background: transparent; border: 1px solid transparent; transition: background-color var(--mg-dur-1) var(--mg-ease-out), border-color var(--mg-dur-1) var(--mg-ease-out); }
+#bb-picker .bb-shape:hover { background: var(--mg-hover); }
+#bb-picker .bb-shape[data-on] { background: var(--mg-active); border-color: var(--mg-hairline-strong); }
+#bb-picker .bb-colors { display: grid; grid-template-columns: repeat(12, 20px); gap: 7px; }
+#bb-picker .bb-color { width: 20px; height: 20px; border-radius: 9999px !important; box-shadow: inset 0 0 0 1px var(--mg-hairline-strong); transition: transform var(--mg-dur-2) var(--mg-ease-spring); }
+#bb-picker .bb-color:hover { transform: scale(1.12); }
+#bb-picker .bb-color[data-on] { box-shadow: 0 0 0 2px var(--mg-raised), 0 0 0 3.5px var(--mg-primary); }
+#bb-picker .bb-more { font-size: var(--mg-fs-meta); color: var(--mg-text-3); background: transparent; padding: 2px 6px; }
+#bb-picker .bb-more:hover { color: var(--mg-text-2); }
+
+/* ── Left zone: sessions and bots share one column ── */
+[data-bb-left-zone] { position: relative !important; }
+[data-bb-left-zone] > #mf-footer { position: absolute; left: 0; right: 0; bottom: 0; z-index: 5; background: var(--mg-surface); }
+[data-bb-left-zone] > :not([data-panel-header]):not(#mf-footer):not(#bb-collapse) { padding-bottom: 58px; }
+[data-bb-left-zone] .uppercase { text-transform: none !important; letter-spacing: 0 !important; font-size: var(--mg-fs-meta) !important; font-weight: 500 !important; color: var(--mg-text-3) !important; }
+[data-bb-sidebar-tabs] { display: none !important; }
+[data-bb-left-zone] { padding-top: var(--mg-header-h) !important; }
+/* The window drags by the band above the sessions, but never by the zone
+   itself: Electron builds the drag area in document order, and the corner
+   cluster comes earlier in the document, so a draggable zone lands on top of
+   the sidebar button and swallows its clicks. Two strips, one each side of
+   the button, leave it alone. */
+[data-bb-left-zone]::before, [data-bb-left-zone]::after {
+  content: ""; position: absolute; top: 0; height: var(--mg-header-h);
+  pointer-events: none; -webkit-app-region: drag;
+}
+[data-bb-left-zone]::before { left: 0; width: calc(var(--mg-lights-x, 82px) - 4px); }
+[data-bb-left-zone]::after { left: calc(var(--mg-lights-x, 82px) + 30px); right: 0; }
+/* The hairline under the top band carries on across the sidebar side */
+[data-bb-left-zone] {
+  background-image: linear-gradient(var(--mg-hairline), var(--mg-hairline)) !important;
+  background-size: 100% 1px !important; background-repeat: no-repeat !important;
+  background-position: 0 calc(var(--mg-header-h) - 1px) !important;
+}
+[data-bb-collapsed] > #mf-footer { display: none !important; }
+[data-bb-rail] { visibility: hidden !important; }
+[data-bb-narrow] { min-width: 180px !important; }
+[data-slot="bot_chat_empty"] { display: none !important; }
+
+/* ── Bot chat: name tag over the thread ── */
+#bb-pill { position: absolute; top: 12px; left: 50%; transform: translateX(-50%); z-index: 35;
+  display: flex; align-items: center; gap: 8px; padding: 4px 13px 4px 5px; border-radius: 9999px;
+  background: var(--mg-raised); border: 1px solid var(--mg-hairline-strong);
+  font-size: var(--mg-fs-ui); font-weight: 500; color: var(--mg-text); pointer-events: none;
+  transition: background-color var(--mg-dur-1) var(--mg-ease-out), border-color var(--mg-dur-1) var(--mg-ease-out); }
+#bb-pill:hover { background: var(--mg-raised-2); border-color: var(--mg-hairline-bold); }
+#bb-pill .bb-pill-ic { display: grid; place-items: center; width: 22px; height: 22px; }
+
+/* ── Sessions ⇄ bots switch in the footer ── */
+#bb-mascot { width: 28px; height: 28px; border-radius: var(--mg-r-button) !important; display: grid; place-items: center; flex-shrink: 0;
+  background: var(--mg-raised); color: var(--mg-text-2);
+  transition: background-color var(--mg-dur-1) var(--mg-ease-out), color var(--mg-dur-1) var(--mg-ease-out), transform var(--mg-dur-1) var(--mg-ease-out); }
+#bb-mascot:hover { background: var(--mg-raised-2); color: var(--mg-text); }
+#bb-mascot:active { transform: scale(.92); }
+#bb-mascot > span { grid-area: 1 / 1; display: grid; place-items: center; transition: opacity var(--mg-dur-2) var(--mg-ease-out), transform var(--mg-dur-3) var(--mg-ease-spring); }
+#bb-mascot .bb-code { opacity: 0; transform: scale(.6); }
+#bb-mascot[data-mode="bots"] .bb-face { opacity: 0; transform: scale(.6); }
+#bb-mascot[data-mode="bots"] .bb-code { opacity: 1; transform: none; }
+/* Bots: drop core "Scheduled jobs" rail (bot-panel has cron jobs) + its sash */
+[data-tree-split] > div:has(> [data-tree-group] [data-pane-tab-id="hermes-bots:routines"]) { display: none !important; }
