@@ -17,12 +17,21 @@ grayscale chrome. Colour appears only in model and service logos.
 
 ## Install
 
-You need Hermes (desktop app, started at least once) and Node 18 or later.
+### Before you start
+
+1. **Install Hermes Agent and the Hermes desktop app**: follow the official guide at
+   <https://hermes-agent.nousresearch.com/docs>.
+2. **Open the desktop app once.** That creates `~/.hermes`, where Monograph installs.
+3. **Install Node.js 18 or later.** Check with `node -v`. If it's missing, get it from
+   <https://nodejs.org> or run `brew install node`. The installer uses it to build the plugin.
+
+### Install Monograph
 
 ```sh
 git clone https://github.com/machina-exm/monograph.git
 cd monograph
 ./install.sh
+hermes config set display.skin monograph   # turns on the colours
 ```
 
 `install.sh` builds a release of the plugin from the sources (in a temporary
