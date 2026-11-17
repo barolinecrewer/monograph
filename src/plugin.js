@@ -718,6 +718,8 @@ const STREAM_ID = /^assistant-stream-/
 // A row Hermes is streaming (named by nextStreamMessageId).
 const STREAMED_ID = /^assistant-(?:stream|interim)-/
 const STALE_MIN_TEXT = 80
+// A streamed row and the stored row of the same reply start within this many ms.
+const STALE_MATCH_MS = 2000
 const USER_ROW = '[data-slot="aui_user-message-root"]'
 const THREAD = '[data-slot="aui_thread-content"]'
 const VIEWPORT = '[data-slot="aui_thread-viewport"]'
@@ -2029,7 +2031,10 @@ function turnDecor() {
     for (let index = users.length - 1; index >= 0; index -= 1) {
       const at = STORED_ID.exec(users[index].dataset.messageId ?? '')?.[1]
 
-      put(users[index], 'mgStale', at && later.has(at) ? '' : null)
+      // A live bubble (no stored id) is decided below, with its reply rows.
+      if (at || !users[index].closest(PAIR)?.querySelector('[data-message-id^="assistant-stream-"]')) {
+        put(users[index], 'mgStale', at && later.has(at) ? '' : null)
+      }
 
       if (at) {
         later.add(at)
@@ -2051,21 +2056,55 @@ function turnDecor() {
     }
 
     let stored = null
+    let storedTimes = null
+    const copies = new Map() // pair → [rows that are copies, streamed rows]
 
     for (const row of streamed) {
       let copy = false
       const pair = row.closest(PAIR)
 
       if (!pair?.querySelector(BUSY) && !(busy && pair === lastPair(thread))) {
-        const text = lastProse(row)
+        // By time: a streamed row is named by the ms its first words arrived,
+        // and the stored row of the same reply carries that moment in its id
+        // (seconds). This holds when the original is far up the thread or
+        // scrolled out, where its text is not rendered and the test below
+        // finds nothing (youtube bot, 2026-11-17: the copy sat 7 turns down).
+        const at = streamedAt(row)
 
-        if (text.length >= STALE_MIN_TEXT) {
+        if (at) {
+          storedTimes ??= [...thread.querySelectorAll('[data-message-id$="-assistant"]')]
+            .map(other => STORED_ID.exec(other.dataset.messageId ?? '')?.[1])
+            .filter(Boolean)
+            .map(sec => Number(sec) * 1000)
+          copy = storedTimes.some(ms => Math.abs(ms - at) <= STALE_MATCH_MS)
+        }
+
+        const text = copy ? '' : lastProse(row)
+
+        if (!copy && text.length >= STALE_MIN_TEXT) {
           stored ??= new Set(recent().map(storedProse))
           copy = stored.has(text)
         }
       }
 
       put(row, 'mgStale', copy ? '' : null)
+
+      if (pair) {
+        const seen = copies.get(pair) ?? [0, 0]
+        copies.set(pair, [seen[0] + (copy ? 1 : 0), seen[1] + 1])
+      }
+    }
+
+    // The copy's own prompt: a live bubble (no stored id) in a turn whose
+    // every reply row is a copy and that holds no stored row of its own.
+    for (const [pair, [copied, total]] of copies) {
+      const copy = copied > 0 && copied === total && ![...pair.querySelectorAll(ROW)].some(row => STORED_ID.test(row.dataset.messageId ?? ''))
+
+      for (const user of pair.querySelectorAll(`${USER_ROW}:not([data-mg-queued])`)) {
+        if (!STORED_ID.test(user.dataset.messageId ?? '')) {
+          put(user, 'mgStale', copy ? '' : null)
+        }
+      }
     }
   })
 
