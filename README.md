@@ -148,10 +148,15 @@ strip that stops short of the buttons.
 ## Surfaces
 
 On Mac, tap and release either **⌘ Command** key by itself to open the
-**Open a surface** picker. Choose a row with its letter, or press **Esc** to
-close the picker. The listener doesn't intercept Command shortcuts. If macOS
-or Electron handles a shortcut without passing enough input to Monograph,
-letting go of Command first can still open the picker.
+**Open a surface** picker. Change the trigger in **Settings → Plugins →
+Monograph → Keyboard → Surface picker key**: choose **Command**, **Option**,
+**Control**, or **Off**. Changes apply immediately, and the titlebar button
+still works when the gesture is off.
+
+Choose a row with its letter, or press **Esc** to close the picker. The
+listener doesn't intercept shortcuts. If macOS or Electron handles a shortcut
+without passing enough input to Monograph, releasing the modifier first can
+still open the picker.
 
 Monograph's own rows sit at the top of the surfaces menu, above Hermes':
 

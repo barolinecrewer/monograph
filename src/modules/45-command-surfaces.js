@@ -1,16 +1,28 @@
 // A tap, not a keybinding chord: observe the real input and leave its defaults
 // alone. The titlebar picker stays the owner of menu state and focus.
+const surfaceKeyOptions = [
+  { id: 'command', label: '⌘ Command', key: 'Meta', flag: 'metaKey' },
+  { id: 'option', label: '⌥ Option', key: 'Alt', flag: 'altKey' },
+  { id: 'control', label: '⌃ Control', key: 'Control', flag: 'ctrlKey' },
+  { id: 'off', label: 'Off' }
+]
+const surfaceKeyOption = value => surfaceKeyOptions.find(option => option.id === value) ?? surfaceKeyOptions[0]
+const surfaceKeySupported = () => /mac/i.test(navigator.platform)
+
 MODULES.push({
   id: 'command-surfaces',
   start() {
-    if (!/mac/i.test(navigator.platform)) {
+    if (!surfaceKeySupported()) {
       return undefined
     }
 
     const maxTapMs = 500
     const releaseGraceMs = 80
-    const command = event => event.key === 'Meta' && (event.code === 'MetaLeft' || event.code === 'MetaRight')
-    const otherModifiers = event => event.ctrlKey || event.altKey || event.shiftKey || event.isComposing
+    let option = surfaceKeyOption(getConfig().surfaceKey)
+    const matches = event => option.key && event.key === option.key &&
+      (event.code === `${option.key}Left` || event.code === `${option.key}Right`)
+    const flags = ['metaKey', 'altKey', 'ctrlKey', 'shiftKey']
+    const otherModifiers = event => event.isComposing || flags.some(flag => flag !== option.flag && event[flag])
     let pressed = null
     let queued
 
@@ -20,19 +32,27 @@ MODULES.push({
       queued = undefined
     }
 
+    const stopSettings = subscribe(() => {
+      const next = surfaceKeyOption(getConfig().surfaceKey)
+      if (next !== option) {
+        cancel()
+        option = next
+      }
+    })
+
     function down(event) {
       if (!event.isTrusted) {
         return
       }
 
-      if (pressed && command(event) && event.repeat && event.code === pressed.code) {
+      if (pressed && matches(event) && event.repeat && event.code === pressed.code) {
         return
       }
 
       const wasPressed = Boolean(pressed)
       cancel()
 
-      if (!wasPressed && command(event) && event.metaKey && !event.repeat && !otherModifiers(event)) {
+      if (!wasPressed && matches(event) && event[option.flag] && !event.repeat && !otherModifiers(event)) {
         pressed = { code: event.code, at: event.timeStamp }
       }
     }
@@ -42,7 +62,7 @@ MODULES.push({
         return
       }
 
-      const tap = pressed && command(event) && pressed.code === event.code && !event.metaKey &&
+      const tap = pressed && matches(event) && pressed.code === event.code && !event[option.flag] &&
         !otherModifiers(event) && event.timeStamp - pressed.at <= maxTapMs
       cancel()
 
@@ -71,6 +91,7 @@ MODULES.push({
     }
 
     return () => {
+      stopSettings()
       cancel()
       for (const [target, type, listener] of listeners) {
         target.removeEventListener(type, listener, capture)
