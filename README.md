@@ -372,6 +372,16 @@ The suites, each one app launch (`--suite <name>`):
 Each feature suite ends with a hot-reload check: reloaded twice, then
 unloaded, the plugin leaves nothing of its own behind.
 
+## Security
+
+The plugins run inside the Hermes desktop app with its full access, and the
+companion plugins in `extras/` are only as trusted as their source: review them
+before `--full`. Monograph's own code reads no secrets. The `live-status`
+plugin sends each tool's name and any error text to the title model, never its
+arguments. The installer refuses to write through a symlink. The dashboard
+routes in `extras/plugins/` have no login of their own: they are served by
+Hermes, so Hermes must listen on localhost only.
+
 ## Licence
 
 MIT, see `LICENSE`. That covers Monograph's own code and styles.
