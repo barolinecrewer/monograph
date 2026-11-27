@@ -58,6 +58,12 @@ fail() {
   printf 'install.sh: %s\n' "$*" >&2
   exit 1
 }
+# Writing through a symlink would overwrite whatever it points at.
+refuse_links() {
+  for rel in "$@"; do
+    if [ -L "$home/$rel" ]; then fail "$home/$rel is a symlink; refusing to write through it. Nothing was changed."; fi
+  done
+}
 
 # The files, as "relative path in the Hermes home".
 PLUGIN_REL=desktop-plugins/monograph/plugin.js
@@ -82,6 +88,7 @@ if [ "$mode" = uninstall ]; then
 
   # Every file this installer put in place (Monograph, skin, extras).
   rels=$( { [ -d "$state/installed" ] && (cd "$state/installed" && find . -type f | sed 's|^\./||'); printf '%s\n%s\n' "$PLUGIN_REL" "$SKIN_REL"; } | sort -u)
+  refuse_links $rels
   printf '%s\n' "$rels" | while IFS= read -r rel; do
     [ -n "$rel" ] || continue
     dst="$home/$rel"
@@ -173,6 +180,9 @@ node --check "$stage/dist/plugin.js" 2> /dev/null || fail "the built plugin does
 say "Built $(printf '%s\n' "$out" | sed -n '1s/^built dist\/plugin.js *//p')  ($build build)"
 
 # ── Install: copy ───────────────────────────────────────────────────────────
+refuse_links "$PLUGIN_REL"
+if [ "$skin" = yes ]; then refuse_links "$SKIN_REL"; fi
+if [ "$full" = yes ]; then refuse_links $(cd "$repo/extras" && find . -type f | sed 's|^\./||'); fi
 say "Installing into $home"
 mkdir -p "$state/original" "$state/installed"
 
