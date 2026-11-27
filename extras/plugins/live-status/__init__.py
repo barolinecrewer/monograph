@@ -19,7 +19,6 @@ logger = logging.getLogger(__name__)
 _lock = threading.Lock()
 _latest: dict[str, dict] = {}      # session -> newest pending event
 _workers: set[str] = set()
-_MAX_ARG = 400
 
 _PROMPT = (
     "You write the one-line live status shown under a coding assistant while it works. "
@@ -58,12 +57,9 @@ def _write(session_id: str, text: str, kind: str = "work") -> None:
 
 def _summarise(ev: dict) -> str | None:
     from agent.auxiliary_client import call_llm
-    args = ev.get("args")
-    try:
-        args = json.dumps(args, default=str)[:_MAX_ARG]
-    except Exception:
-        args = str(args)[:_MAX_ARG]
-    desc = f"Tool: {ev.get('tool')}\nArguments: {args}"
+    # Only the tool's name and any error reach the model: tool arguments can
+    # carry tokens and passwords, and a title does not need them.
+    desc = f"Tool: {ev.get('tool')}"
     if ev.get("error"):
         desc += f"\nFAILED with: {str(ev['error'])[:300]}"
     resp = call_llm(
