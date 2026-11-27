@@ -22,6 +22,7 @@ const apDefaults = () => ({
   motion: DEFAULTS.motion === 'off' ? 'off' : 'on',
   name: typeof DEFAULTS.name === 'string' ? DEFAULTS.name : '',
   palette: DEFAULTS.palette === 'gruvbox' ? 'gruvbox' : 'monograph',
+  surfaceKey: surfaceKeyOption(DEFAULTS.surfaceKey).id,
   thinking: DEFAULTS.thinking === 'line' ? 'line' : 'live',
   tools: DEFAULTS.tools === 'hidden' ? 'hidden' : 'shown'
 })
@@ -272,7 +273,7 @@ function ApPictureRow() {
 function ApResetRow() {
   const [open, setOpen] = useState(false)
   const cancel = React.useRef(null)
-  const description = 'Name, picture, greeting, tool calls, thinking, density, palette and motion go back to how Monograph ships.'
+  const description = 'Name, picture, greeting, tool calls, thinking, density, palette, keyboard and motion go back to how Monograph ships.'
   const parts = sdk.Dialog && sdk.DialogTrigger && sdk.DialogContent && sdk.DialogTitle && sdk.Button
 
   const reset = () => {
@@ -463,6 +464,24 @@ function AppearancePage() {
           })
         ]
       }),
+      surfaceKeySupported() ? jsxs('section', {
+        'aria-labelledby': 'mg-ap-keyboard',
+        className: 'mg-ap-section',
+        children: [
+          jsx('h3', { className: 'mg-ap-heading', id: 'mg-ap-keyboard', children: 'Keyboard' }),
+          jsx(ApRow, {
+            action: jsx(ApChoice, {
+              label: 'Surface picker key',
+              onChange: id => setConfig({ surfaceKey: surfaceKeyOption(id).id }),
+              options: surfaceKeyOptions,
+              value: surfaceKeyOption(current.surfaceKey).id
+            }),
+            description: 'Tap and release this key by itself to open the surface picker. Off leaves the titlebar button available.',
+            id: 'monograph-surface-key',
+            title: 'Surface picker key'
+          })
+        ]
+      }) : null,
       jsx('section', { className: 'mg-ap-section mg-ap-section-last', children: jsx(ApResetRow, {}) })
     ]
   })

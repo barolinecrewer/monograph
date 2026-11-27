@@ -13,8 +13,12 @@ function harness(platform = 'MacIntel') {
   let sequence = 0
   window.setTimeout = callback => { timers.set(++sequence, callback); return sequence }
   window.clearTimeout = id => timers.delete(id)
-  runInNewContext(source, { MODULES, navigator: { platform }, window, document, openSurfaces: open => opens.push(open) })
+  let config = {}
+  const listeners = new Set()
+  const subscribe = listener => { listeners.add(listener); return () => listeners.delete(listener) }
+  runInNewContext(source, { MODULES, navigator: { platform }, window, document, getConfig: () => config, subscribe, openSurfaces: open => opens.push(open) })
   const dispose = MODULES[0].start()
+  const select = surfaceKey => { config = { surfaceKey }; listeners.forEach(listener => listener()) }
 
   function emit(type, fields = {}, target = window) {
     const event = new Event(type, { cancelable: true })
@@ -36,8 +40,67 @@ function harness(platform = 'MacIntel') {
     }
   }
 
-  return { command, document, dispose, emit, flush, opens }
+  return { command, document, dispose, emit, flush, opens, select, listeners }
 }
+
+test('changing the chosen modifier or turning it off takes effect without a reload', () => {
+  const h = harness()
+  for (const [setting, key, flag] of [['option', 'Alt', 'altKey'], ['control', 'Control', 'ctrlKey'], ['command', 'Meta', 'metaKey']]) {
+    h.select(setting)
+    const before = h.opens.length
+    h.emit('keydown', { key, code: `${key}Right`, [flag]: true, timeStamp: 10 })
+    h.emit('keyup', { key, code: `${key}Right`, [flag]: false, timeStamp: 100 })
+    h.flush()
+    assert.equal(h.opens.length, before + 1, setting)
+  }
+  h.select('off')
+  h.command('keydown', 10)
+  h.command('keyup', 100)
+  h.flush()
+  assert.equal(h.opens.length, 3)
+})
+
+test('changing the setting cancels a pending tap, even if switched back before release', () => {
+  const h = harness()
+  h.command('keydown', 10)
+  h.select('off')
+  h.select('command')
+  h.command('keyup', 100)
+  h.flush()
+  h.command('keydown', 200)
+  h.command('keyup', 250)
+  h.select('option')
+  h.flush()
+  assert.deepEqual(h.opens, [])
+  h.dispose()
+  assert.equal(h.listeners.size, 0)
+})
+
+test('Monograph settings offers the macOS key choices and writes the selected value', () => {
+  const appearance = readFileSync(new URL('../src/modules/10-appearance.js', import.meta.url), 'utf8')
+  const gesture = readFileSync(new URL('../src/modules/45-command-surfaces.js', import.meta.url), 'utf8')
+  const SHARED = {}
+  const selected = []
+  const jsx = (type, props) => ({ type, props })
+  const navigator = { platform: 'MacIntel' }
+  const defaults = runInNewContext(`${appearance}\n${gesture}\napDefaults`, {
+    MODULES: [], SHARED, navigator, jsx, jsxs: jsx, DEFAULTS: {},
+    greeting: () => '', ToolCallsRow: () => null, thinkingMode: () => 'live',
+    useSyncExternalStore: (_, read) => read(), subscribe: () => {},
+    getConfig: () => ({ surfaceKey: 'option' }), setConfig: patch => selected.push(patch.surfaceKey)
+  })
+  const row = () => SHARED.settingsPage().props.children
+    .flatMap(section => [].concat(section?.props.children ?? []))
+    .find(node => node?.props.id === 'monograph-surface-key')
+  const control = row().props.action.props
+  assert.deepEqual(Array.from(control.options, option => option.id), ['command', 'option', 'control', 'off'])
+  assert.equal(control.value, 'option')
+  control.onChange('off')
+  assert.deepEqual(selected, ['off'])
+  assert.equal(defaults().surfaceKey, 'command')
+  navigator.platform = 'Linux x86_64'
+  assert.equal(row(), undefined)
+})
 
 test('a solo press of either Mac Command key opens the same picker on release', () => {
   const h = harness()
