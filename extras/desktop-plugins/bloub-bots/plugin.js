@@ -40,6 +40,9 @@ const known = new Map()   // bot name -> { shape, color, title }
 const faces = new WeakMap() // original svg -> { av, wrap }
 
 const PRIMARY = { shape: 'circle', color: '#f4f4f4' }
+// The colour is written into the SVG as an attribute: only a plain colour may pass.
+const COLOR = /^(#[0-9a-f]{3}|#[0-9a-f]{6}|(rgb|hsl)\([\d\s.,%]+\))$/i
+const safeColor = (c, fallback = '#f2f2f2') => (typeof c === 'string' && COLOR.test(c.trim()) ? c.trim() : fallback)
 function readFace(svg) {
   if (svg.getAttribute('data-bot-face') === 'default') {
     return { ...PRIMARY, mode: /work|think/.test(svg.getAttribute('data-hb-mood') || '') ? 'work' : 'idle', size: Number(svg.getAttribute('width')) || svg.getBoundingClientRect().width || 36 }
@@ -51,7 +54,7 @@ function readFace(svg) {
     const fills = [...svg.querySelectorAll('[fill]')].map(n => n.getAttribute('fill')).filter(c => c && !/^(none|#fff|#ffffff|white|#000|#000000|black)$/i.test(c) && !/^url/.test(c))
     color = fills[0] || color
   }
-  if (!/^#|^rgb|^hsl/.test(color)) color = '#f2f2f2'
+  color = safeColor(color)
   return {
     shape: isBlob ? 'blob' : (svg.getAttribute('data-hb-shape') || 'circle'),
     color,
@@ -103,7 +106,7 @@ async function loadMeta() {
     for (const p of r?.profiles || []) {
       const m = p?.ui_meta?.['hermes-bots'] || {}
       const prev = known.get(p.name) || {}
-      known.set(p.name, { shape: m.shape || prev.shape, color: m.color || prev.color, title: m.title || p.name })
+      known.set(p.name, { shape: m.shape || prev.shape, color: safeColor(m.color, prev.color), title: m.title || p.name })
     }
   } catch {}
 }
@@ -296,7 +299,7 @@ function renderPicker() {
       }
     }
     const p = cur()
-    const col = p.color && /^#|^hsl|^rgb/.test(p.color) ? p.color : (panel._color || '#f4f4f4')
+    const col = safeColor(p.color, panel._color || '#f4f4f4')
     panel._thumbs.forEach(t => t.set({ color: col }))
     panel.querySelectorAll('.bb-shape').forEach(b => b.toggleAttribute('data-on', b.dataset.shape === p.shape))
     panel.querySelectorAll('.bb-color').forEach(b => b.toggleAttribute('data-on', (p.color || '').toLowerCase() === b.dataset.color))
