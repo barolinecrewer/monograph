@@ -58,6 +58,20 @@ yourself:
 hermes config set display.skin monograph
 ```
 
+### Optional: use `just`
+
+From the clone, with the `just` command runner installed:
+
+```sh
+just install      # install the plugin and skin
+just update       # pull the tracked branch with --ff-only, then reinstall
+just uninstall    # remove or restore files managed by the installer
+```
+
+`just install` and `just update` also accept installer options. If you use
+all the extras, run `just install --full` or `just update --full`.
+Uninstall does not revert Hermes settings changed by `--full`.
+
 ### Update
 
 ```sh
