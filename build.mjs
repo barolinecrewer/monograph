@@ -63,6 +63,23 @@ const logoCss = [
 
 modules.splice(1, 0, ['src/logos (generated)', logoCss])
 
+// The Desktop plugin is a single file. Bundle Karla with its OFL so the
+// palette works offline and the installed artifact carries the font license.
+const karla = (name, extension) => fs.readFileSync(at('src', 'fonts', 'karla', `${name}.${extension}`))
+const karlaRanges = {
+  latin: 'U+0000-00FF,U+0131,U+0152-0153,U+02BB-02BC,U+02C6,U+02DA,U+02DC,U+0304,U+0308,U+0329,U+2000-206F,U+20AC,U+2122,U+2191,U+2193,U+2212,U+2215,U+FEFF,U+FFFD',
+  'latin-ext': 'U+0100-02BA,U+02BD-02C5,U+02C7-02CC,U+02CE-02D7,U+02DD-02FF,U+0304,U+0308,U+0329,U+1D00-1DBF,U+1E00-1E9F,U+1EF2-1EFF,U+2020,U+20A0-20AB,U+20AD-20C4,U+2113,U+2C60-2C7F,U+A720-A7FF'
+}
+const karlaCss = [
+  '/*\n' + karla('OFL', 'txt').toString('utf8').trim() + '\n*/',
+  ...['normal', 'italic'].flatMap(style => ['latin-ext', 'latin'].map(subset => {
+    const font = karla(`${style === 'normal' ? 'regular' : 'italic'}-${subset}`, 'woff2')
+
+    return `@font-face { font-family: "Karla"; font-style: ${style}; font-weight: 400 700; font-display: swap; src: url("data:font/woff2;base64,${font.toString('base64')}") format("woff2"); unicode-range: ${karlaRanges[subset]}; }`
+  }))
+].join('\n')
+modules.push(['src/fonts/karla (generated)', karlaCss])
+
 // Service logos (src/logos/services): a custom property per id on
 // [data-mg-service="<id>"], which 34-services.css draws, and the table the
 // services module (src/modules/00-services.js) matches tool names against.

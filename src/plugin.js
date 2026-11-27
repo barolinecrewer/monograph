@@ -77,6 +77,7 @@ function applyConfig(current) {
   // Stylesheets read these two; anything else in the config is its module's.
   root.dataset.mgMotion = current.motion === 'off' ? 'off' : 'on'
   root.dataset.mgDensity = current.density === 'compact' ? 'compact' : 'comfortable'
+  root.dataset.mgPalette = current.palette === 'gruvbox' ? 'gruvbox' : 'monograph'
 }
 
 function setConfig(patch) {
@@ -3884,6 +3885,7 @@ export default {
         delete root.dataset.mgThinking
         delete root.dataset.mgMotion
         delete root.dataset.mgDensity
+        delete root.dataset.mgPalette
         root.style.removeProperty('--mg-greeting')
         root.style.removeProperty('--mg-lights-x')
         root.style.removeProperty('--mg-lights-y')
