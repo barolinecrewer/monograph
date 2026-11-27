@@ -286,6 +286,13 @@ once, survives a restart and reaches a second window.
 | Tool calls | shown, hidden | shown |
 | Density | comfortable, compact | comfortable |
 | Motion | on, off | on |
+| Palette | Monograph, Gruvbox | Monograph |
+
+Select **Gruvbox** in **Settings → Plugins → Monograph → Palette** for a
+Dark Medium-inspired charcoal palette, soft amber accents, and bundled Karla
+UI text. Karla takes precedence over the saved Chat Font while Gruvbox is on.
+The embedded terminal keeps Hermes' native font preference; leave **Terminal
+Font** blank to use Hermes' bundled JetBrains Mono.
 
 Hidden tool calls hide tool rows, run summaries and thinking; approvals and
 questions always show. Compact tightens turns, tool rows, paragraphs and

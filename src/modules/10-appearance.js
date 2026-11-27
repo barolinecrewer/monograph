@@ -21,6 +21,7 @@ const apDefaults = () => ({
   greeting: typeof DEFAULTS.greeting === 'string' ? DEFAULTS.greeting : '',
   motion: DEFAULTS.motion === 'off' ? 'off' : 'on',
   name: typeof DEFAULTS.name === 'string' ? DEFAULTS.name : '',
+  palette: DEFAULTS.palette === 'gruvbox' ? 'gruvbox' : 'monograph',
   thinking: DEFAULTS.thinking === 'line' ? 'line' : 'live',
   tools: DEFAULTS.tools === 'hidden' ? 'hidden' : 'shown'
 })
@@ -271,7 +272,7 @@ function ApPictureRow() {
 function ApResetRow() {
   const [open, setOpen] = useState(false)
   const cancel = React.useRef(null)
-  const description = 'Name, picture, greeting, tool calls, thinking, density and motion go back to how Monograph ships.'
+  const description = 'Name, picture, greeting, tool calls, thinking, density, palette and motion go back to how Monograph ships.'
   const parts = sdk.Dialog && sdk.DialogTrigger && sdk.DialogContent && sdk.DialogTitle && sdk.Button
 
   const reset = () => {
@@ -298,7 +299,7 @@ function ApResetRow() {
                 children: [
                   jsx(sdk.DialogTitle, { children: 'Reset Monograph to its defaults?' }),
                   sdk.DialogDescription
-                    ? jsx(sdk.DialogDescription, { children: 'This clears your name, picture and greeting, and turns tool calls, thinking, density and motion back to their defaults.' })
+                    ? jsx(sdk.DialogDescription, { children: description })
                     : null
                 ]
               }),
@@ -424,6 +425,27 @@ function AppearancePage() {
             description: 'Compact tightens the space between turns, tool rows, paragraphs and sidebar rows. The composer and the top band keep their size.',
             id: 'monograph-density',
             title: 'Density'
+          })
+        ]
+      }),
+      jsxs('section', {
+        'aria-labelledby': 'mg-ap-palette',
+        className: 'mg-ap-section',
+        children: [
+          jsx('h3', { className: 'mg-ap-heading', id: 'mg-ap-palette', children: 'Appearance' }),
+          jsx(ApRow, {
+            action: jsx(ApChoice, {
+              label: 'Palette',
+              onChange: id => setConfig({ palette: id === 'gruvbox' ? 'gruvbox' : 'monograph' }),
+              options: [
+                { id: 'monograph', label: 'Monograph' },
+                { id: 'gruvbox', label: 'Gruvbox' }
+              ],
+              value: current.palette === 'gruvbox' ? 'gruvbox' : 'monograph'
+            }),
+            description: 'Gruvbox warms the dark palette and sets the UI in Karla. The terminal keeps your Hermes font preference.',
+            id: 'monograph-palette',
+            title: 'Palette'
           })
         ]
       }),
