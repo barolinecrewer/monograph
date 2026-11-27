@@ -44,9 +44,6 @@ const PRIMARY = { shape: 'circle', color: '#f4f4f4' }
 const COLOR = /^(#[0-9a-f]{3}|#[0-9a-f]{6}|(rgb|hsl)\([\d\s.,%]+\))$/i
 const safeColor = (c, fallback = '#f2f2f2') => (typeof c === 'string' && COLOR.test(c.trim()) ? c.trim() : fallback)
 function readFace(svg) {
-  if (svg.getAttribute('data-bot-face') === 'default') {
-    return { ...PRIMARY, mode: /work|think/.test(svg.getAttribute('data-hb-mood') || '') ? 'work' : 'idle', size: Number(svg.getAttribute('width')) || svg.getBoundingClientRect().width || 36 }
-  }
   const isBlob = !svg.hasAttribute('data-hb-math')
   const body = svg.querySelector('[data-hb-body]') || svg.querySelector('path[fill], circle[fill], rect[fill]')
   let color = body?.getAttribute('fill') || '#f2f2f2'
@@ -324,7 +321,9 @@ function renderHero() {
   document.querySelectorAll('[data-bb-zone-skip]').forEach(n => { if (n !== z || !addB) { n.removeAttribute('data-bb-zone-skip'); n.removeAttribute('data-context-menu-skip') } })
   if (addB && !z.hasAttribute('data-context-menu-skip')) { z.setAttribute('data-context-menu-skip', ''); z.setAttribute('data-bb-zone-skip', '') }
   const name = row.querySelector('.truncate.font-medium')?.textContent?.trim() || 'Hermes'
-  const working = !!row.querySelector('[data-hb-mood="work"], [data-hb-mood="think"]')
+  const nativeFace = row.querySelector('svg[data-bot-face="default"]')
+  // Read the roster's committed appearance, never the unsaved editor preview.
+  const { shape, color, mode } = nativeFace ? readFace(nativeFace) : PRIMARY
   if (!hero || hero.parentElement !== list || list.firstElementChild !== hero) {
     hero?.remove()
     hero = document.createElement('button'); hero.id = 'bb-hero'; hero.type = 'button'
@@ -332,13 +331,13 @@ function renderHero() {
     const nm = document.createElement('span'); nm.className = 'bb-hero-name'
     hero.append(face, nm)
     list.insertBefore(hero, list.firstChild)
-    heroAv = mount(face, { size: 76, ...PRIMARY, paper: PAPER, mode: 'idle' })
+    heroAv = mount(face, { size: 76, shape, color, paper: PAPER, mode: mode || 'idle' })
     hero.addEventListener('click', () => document.querySelector('[data-roster-key$="::default"]')?.click())
     hero.addEventListener('contextmenu', e => { e.preventDefault(); const r = document.querySelector('[data-roster-key$="::default"]'); r?.dispatchEvent(new MouseEvent('contextmenu', { bubbles: true, clientX: e.clientX, clientY: e.clientY })) })
   }
   const hn = hero.querySelector('.bb-hero-name'); if (hn.textContent !== name) hn.textContent = name
   const act = row.className.includes('row-active'); if (hero.hasAttribute('data-active') !== act) hero.toggleAttribute('data-active', act)
-  heroAv?.set({ mode: working ? 'work' : 'idle' })
+  heroAv?.set({ shape, color, mode: mode || 'idle' })
   // header: tag it for styling
   const add = [...document.querySelectorAll('button[aria-label="New bot or group chat"]')].find(b => b.offsetParent)
   __set(add?.parentElement?.parentElement, 'data-bb-roster-head')
