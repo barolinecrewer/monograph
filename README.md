@@ -145,6 +145,9 @@ Monograph's own rows sit at the top of the surfaces menu, above Hermes':
   once per empty session and never replays.
 - **Agent** (letter p, `20-agent-panel.js`): a right-hand pane with the trace
   of the focused session's turn, its todo list and sub-agents.
+- **Coding workspace** (letter w, `40-coding-workspace.js`): an on-demand
+  pane of saved Git threads grouped by repo, with branch labels and a button
+  for Hermes' Git Review. See [the coding workflow](docs/coding-workspace.md).
 
 Other modules: `00-services.js` puts a service logo on each tool row (by tool
 name or URL; a tool with no known service gets a glyph for its kind),
