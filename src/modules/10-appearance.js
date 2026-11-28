@@ -22,7 +22,7 @@ const apDefaults = () => ({
   motion: DEFAULTS.motion === 'off' ? 'off' : 'on',
   name: typeof DEFAULTS.name === 'string' ? DEFAULTS.name : '',
   palette: DEFAULTS.palette === 'gruvbox' ? 'gruvbox' : 'monograph',
-  surfaceKey: surfaceKeyOption(DEFAULTS.surfaceKey).id,
+  surfaceKey: SHARED.surfaceKey?.option(DEFAULTS.surfaceKey).id ?? 'command',
   thinking: DEFAULTS.thinking === 'line' ? 'line' : 'live',
   tools: DEFAULTS.tools === 'hidden' ? 'hidden' : 'shown'
 })
@@ -339,6 +339,7 @@ function ApResetRow() {
 function AppearancePage() {
   const current = useApConfig()
   const builtIn = greeting({ ...current, greeting: '' })
+  const surfaceKey = SHARED.surfaceKey
 
   return jsxs('div', {
     className: 'mg-ap',
@@ -464,7 +465,7 @@ function AppearancePage() {
           })
         ]
       }),
-      surfaceKeySupported() ? jsxs('section', {
+      surfaceKey?.supported() ? jsxs('section', {
         'aria-labelledby': 'mg-ap-keyboard',
         className: 'mg-ap-section',
         children: [
@@ -472,9 +473,9 @@ function AppearancePage() {
           jsx(ApRow, {
             action: jsx(ApChoice, {
               label: 'Surface picker key',
-              onChange: id => setConfig({ surfaceKey: surfaceKeyOption(id).id }),
-              options: surfaceKeyOptions,
-              value: surfaceKeyOption(current.surfaceKey).id
+              onChange: id => setConfig({ surfaceKey: surfaceKey.option(id).id }),
+              options: surfaceKey.options,
+              value: surfaceKey.option(current.surfaceKey).id
             }),
             description: 'Tap and release this key by itself to open the surface picker. Off leaves the titlebar button available.',
             id: 'monograph-surface-key',

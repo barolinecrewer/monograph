@@ -9,6 +9,10 @@ const surfaceKeyOptions = [
 const surfaceKeyOption = value => surfaceKeyOptions.find(option => option.id === value) ?? surfaceKeyOptions[0]
 const surfaceKeySupported = () => /mac/i.test(navigator.platform)
 
+// The builder gives each feature a private scope. Settings consumes only
+// this exposed interface, not this module's private bindings.
+SHARED.surfaceKey = { options: surfaceKeyOptions, option: surfaceKeyOption, supported: surfaceKeySupported }
+
 MODULES.push({
   id: 'command-surfaces',
   start() {
