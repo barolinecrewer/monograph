@@ -1,5 +1,9 @@
 import assert from 'node:assert/strict'
-import { readFileSync } from 'node:fs'
+import { execFileSync } from 'node:child_process'
+import { cpSync, mkdtempSync, readFileSync, rmSync } from 'node:fs'
+import { tmpdir } from 'node:os'
+import { join } from 'node:path'
+import { fileURLToPath } from 'node:url'
 import { test } from 'node:test'
 import { runInNewContext } from 'node:vm'
 
@@ -16,7 +20,7 @@ function harness(platform = 'MacIntel') {
   let config = {}
   const listeners = new Set()
   const subscribe = listener => { listeners.add(listener); return () => listeners.delete(listener) }
-  runInNewContext(source, { MODULES, navigator: { platform }, window, document, getConfig: () => config, subscribe, openSurfaces: open => opens.push(open) })
+  runInNewContext(source, { MODULES, SHARED: {}, navigator: { platform }, window, document, getConfig: () => config, subscribe, openSurfaces: open => opens.push(open) })
   const dispose = MODULES[0].start()
   const select = surfaceKey => { config = { surfaceKey }; listeners.forEach(listener => listener()) }
 
@@ -76,28 +80,34 @@ test('changing the setting cancels a pending tap, even if switched back before r
   assert.equal(h.listeners.size, 0)
 })
 
-test('Monograph settings offers the macOS key choices and writes the selected value', () => {
-  const appearance = readFileSync(new URL('../src/modules/10-appearance.js', import.meta.url), 'utf8')
-  const gesture = readFileSync(new URL('../src/modules/45-command-surfaces.js', import.meta.url), 'utf8')
-  const SHARED = {}
-  const selected = []
+test('the release plugin renders Monograph settings and saves a surface key', t => {
+  const repo = fileURLToPath(new URL('../', import.meta.url))
+  const dir = mkdtempSync(join(tmpdir(), 'monograph-surface-settings-'))
+  t.after(() => rmSync(dir, { recursive: true, force: true }))
+  for (const file of ['build.mjs', 'package.json', 'src']) cpSync(join(repo, file), join(dir, file), { recursive: true })
+  execFileSync(process.execPath, ['build.mjs', '--release'], { cwd: dir })
+  // Replace host imports only. Preserve the build's lexical boundaries.
+  const plugin = readFileSync(join(dir, 'dist', 'plugin.js'), 'utf8')
+    .replace(/^import .*\n/gm, '')
+    .replace(/^export default \{/m, 'const pluginExport = {')
   const jsx = (type, props) => ({ type, props })
   const navigator = { platform: 'MacIntel' }
-  const defaults = runInNewContext(`${appearance}\n${gesture}\napDefaults`, {
-    MODULES: [], SHARED, navigator, jsx, jsxs: jsx, DEFAULTS: {},
-    greeting: () => '', ToolCallsRow: () => null, thinkingMode: () => 'live',
-    useSyncExternalStore: (_, read) => read(), subscribe: () => {},
-    getConfig: () => ({ surfaceKey: 'option' }), setConfig: patch => selected.push(patch.surfaceKey)
+  const stored = []
+  const shared = runInNewContext(`${plugin}\nstorage = testStorage; SHARED`, {
+    sdk: {}, React: { memo: component => component }, navigator, jsx, jsxs: jsx,
+    useSyncExternalStore: (_, read) => read(),
+    document: { documentElement: { dataset: {}, style: { setProperty() {} } } },
+    testStorage: { set: (_, patch) => stored.push(patch.surfaceKey) }
   })
-  const row = () => SHARED.settingsPage().props.children
+  const row = () => shared.settingsPage().props.children
     .flatMap(section => [].concat(section?.props.children ?? []))
     .find(node => node?.props.id === 'monograph-surface-key')
   const control = row().props.action.props
   assert.deepEqual(Array.from(control.options, option => option.id), ['command', 'option', 'control', 'off'])
-  assert.equal(control.value, 'option')
+  assert.equal(control.value, 'command')
   control.onChange('off')
-  assert.deepEqual(selected, ['off'])
-  assert.equal(defaults().surfaceKey, 'command')
+  assert.deepEqual(stored, ['off'])
+  assert.equal(row().props.action.props.value, 'off')
   navigator.platform = 'Linux x86_64'
   assert.equal(row(), undefined)
 })
